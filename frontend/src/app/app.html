@@ -33,6 +33,11 @@
         🧾 Ventas
       </a>
 
+      <a routerLink="/compras" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('compras')"
+        (click)="menuOpen = false">
+        🛍️ Compras
+      </a>
+
       <a routerLink="/clientes" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('clientes')"
         (click)="menuOpen = false">
         🧑‍💼 Clientes
@@ -46,6 +51,11 @@
       <a routerLink="/proveedores" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('proveedores')"
         (click)="menuOpen = false">
         🚚 Proveedores
+      </a>
+
+      <a routerLink="/descuentos" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('descuentos')"
+        (click)="menuOpen = false">
+        🏷️ Descuentos
       </a>
 
       <a routerLink="/reportes" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('reportes')"
@@ -81,6 +91,28 @@
       <button class="header-toggle" (click)="toggleMenu()">☰</button>
 
       <div class="header-user">
+        <!-- Notificaciones -->
+        <div class="notif-wrapper">
+          <button class="notif-btn" (click)="toggleNotif()" title="Notificaciones">
+            🔔
+            <span class="notif-badge" *ngIf="notificaciones.length > 0">{{ notificaciones.length }}</span>
+          </button>
+          <div class="notif-dropdown" *ngIf="notifOpen">
+            <div class="notif-header">
+              <strong>⚠️ Alertas de Stock</strong>
+            </div>
+            <div *ngIf="notificaciones.length === 0" class="notif-empty">
+              ✅ Sin alertas
+            </div>
+            <div class="notif-list">
+              <div *ngFor="let n of notificaciones.slice(0, 8)" class="notif-item">
+                <span class="notif-product">{{ n.prodnombre || n.nombre }}</span>
+                <span class="notif-stock badge badge-danger">{{ n.prodstock_global || n.stock_actual }} un.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="user-info text-right">
           <span class="user-name">{{ auth.usuario?.usuusuario }}</span>
           <span class="user-role">{{ auth.rolNombre }}</span>

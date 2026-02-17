@@ -1,0 +1,162 @@
+<div class="page-compras">
+
+    <!-- ====== VISTA: HISTORIAL ====== -->
+    <div *ngIf="vistaActual === 'historial'">
+        <header class="page-header">
+            <h1>🛍️ Compras / Entradas de Inventario</h1>
+            <button class="btn btn-primary" (click)="iniciarNuevaCompra()">+ Nueva Compra</button>
+        </header>
+
+        <div class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Documento</th>
+                            <th>Fecha</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Stock Ant.</th>
+                            <th>Stock Act.</th>
+                            <th>Registrado por</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let c of compras">
+                            <td><strong>{{ c.karref_documento }}</strong></td>
+                            <td>{{ c.karfecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                            <td>{{ c.prodnombre }} <small class="d-block">({{ c.prodcodigo }})</small></td>
+                            <td><span class="badge badge-success">+{{ c.karcantidad }}</span></td>
+                            <td>{{ c.karsaldo_anterior }}</td>
+                            <td>{{ c.karsaldo_actual }}</td>
+                            <td>{{ c.usuusuario }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="compras.length === 0 && !loading" class="empty-state">
+                    No hay compras registradas
+                </div>
+                <div *ngIf="loading" class="empty-state">Cargando...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== VISTA: NUEVA COMPRA ====== -->
+    <div *ngIf="vistaActual === 'nueva'">
+        <header class="page-header">
+            <h1>📥 Registrar Compra</h1>
+            <button class="btn btn-secondary" (click)="volverHistorial()">← Volver al Historial</button>
+        </header>
+
+        <div class="compra-layout">
+            <!-- Panel Izquierdo: Proveedor + Productos -->
+            <div class="compra-panel-izq">
+
+                <!-- Seleccionar Proveedor -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🚚 Proveedor</h3>
+                    </div>
+                    <div class="card-body">
+                        <select class="form-control" [(ngModel)]="proveedorSeleccionado">
+                            <option [ngValue]="null">-- Seleccione un proveedor --</option>
+                            <option *ngFor="let p of proveedores" [ngValue]="p">
+                                {{ p.provnombre }} ({{ p.provruc }})
+                            </option>
+                        </select>
+                        <div *ngIf="proveedorSeleccionado" class="prov-det">
+                            <small>📞 {{ proveedorSeleccionado.provtelefono || 'Sin teléfono' }}</small>
+                            <small>📍 {{ proveedorSeleccionado.provdireccion || 'Sin dirección' }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buscar Producto -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📦 Agregar Productos</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-container">
+                            <input type="text" class="form-control" placeholder="Buscar producto por nombre o código..."
+                                [(ngModel)]="busquedaProducto" (input)="buscarProducto()">
+                            <div class="search-results" *ngIf="productosFiltrados.length > 0">
+                                <div *ngFor="let p of productosFiltrados" class="result-item" (click)="agregarItem(p)">
+                                    <strong>{{ p.prodnombre }}</strong>
+                                    <small>{{ p.prodcodigo }} | Stock: {{ p.prodstock_global }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observación -->
+                <div class="card">
+                    <div class="card-body">
+                        <label class="form-label">Observación:</label>
+                        <textarea class="form-control" rows="2" [(ngModel)]="observacion"
+                            placeholder="Notas de la compra..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Derecho: Items -->
+            <div class="compra-panel-der">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Detalle de Compra</h3>
+                    </div>
+
+                    <div class="items-list">
+                        <div *ngFor="let item of items; let i = index" class="compra-item">
+                            <div class="compra-item-header">
+                                <strong>{{ item.prodnombre }}</strong>
+                                <small>{{ item.prodcodigo }}</small>
+                                <button class="btn-remove" (click)="quitarItem(i)">✕</button>
+                            </div>
+                            <div class="compra-item-body">
+                                <div class="campo">
+                                    <label>Cantidad:</label>
+                                    <input type="number" min="1" [(ngModel)]="item.cantidad">
+                                </div>
+                                <div class="campo">
+                                    <label>Costo Unit.:</label>
+                                    <input type="number" min="0" step="0.01" [(ngModel)]="item.costo_compra">
+                                </div>
+                                <div class="campo">
+                                    <label>N° Lote:</label>
+                                    <input type="text" [(ngModel)]="item.nro_lote" placeholder="Opcional">
+                                </div>
+                                <div class="campo">
+                                    <label>Vencimiento:</label>
+                                    <input type="date" [(ngModel)]="item.fecha_vencimiento">
+                                </div>
+                                <div class="campo total">
+                                    <label>Subtotal:</label>
+                                    <strong>$ {{ (item.cantidad * item.costo_compra) | number:'1.2-2' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="items.length === 0" class="empty-carrito">
+                            Agregue productos a la compra
+                        </div>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div class="compra-resumen" *ngIf="items.length > 0">
+                        <div class="resumen-linea resumen-total">
+                            <strong>TOTAL COMPRA:</strong>
+                            <strong>$ {{ totalCompra | number:'1.2-2' }}</strong>
+                        </div>
+                        <button class="btn btn-primary btn-procesar" (click)="procesarCompra()"
+                            [disabled]="items.length === 0 || loading">
+                            📥 Registrar Compra
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

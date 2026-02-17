@@ -1,0 +1,121 @@
+<div class="page-descuentos">
+    <header class="page-header">
+        <h1>🏷️ Descuentos y Promociones</h1>
+        <button class="btn btn-primary" (click)="abrirModal()">+ Nuevo Descuento</button>
+    </header>
+
+    <div class="card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Alcance</th>
+                        <th>Aplica a</th>
+                        <th>Descuento</th>
+                        <th>Vigencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let d of descuentos" [class.inactivo]="!d.descactivo">
+                        <td><strong>{{ d.descnombre }}</strong></td>
+                        <td>
+                            <span class="badge"
+                                [ngClass]="d.descalcance === 'PRODUCTO' ? 'badge-info' : 'badge-warning'">
+                                {{ d.descalcance }}
+                            </span>
+                        </td>
+                        <td>{{ d.referencia_nombre || 'N/A' }}</td>
+                        <td><strong class="descuento-pct">{{ d.descporcentaje }}%</strong></td>
+                        <td>
+                            <small>
+                                {{ d.descfechainicio | date:'dd/MM/yyyy' }} —
+                                {{ d.descfechafin | date:'dd/MM/yyyy' }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="estaActivo(d) ? 'badge-success' : 'badge-danger'">
+                                {{ estaActivo(d) ? 'ACTIVO' : 'INACTIVO' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-sm btn-secondary" (click)="abrirModal(d)">✏️ Editar</button>
+                                <button class="btn btn-sm btn-danger" (click)="eliminar(d)" *ngIf="d.descactivo">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div *ngIf="descuentos.length === 0 && !loading" class="empty-state">
+                No hay descuentos registrados
+            </div>
+            <div *ngIf="loading" class="empty-state">Cargando...</div>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar -->
+    <div class="modal-backdrop" *ngIf="modalOpen" (click)="cerrarModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ editando ? '✏️ Editar' : '➕ Nuevo' }} Descuento</h3>
+                <button class="modal-close" (click)="cerrarModal()">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Nombre del descuento *</label>
+                <input type="text" class="form-control" [(ngModel)]="form.descnombre" placeholder="Ej: Promo Navidad">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Alcance *</label>
+                    <select class="form-control" [(ngModel)]="form.descalcance">
+                        <option value="PRODUCTO">Por Producto</option>
+                        <option value="CATEGORIA">Por Categoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Aplica a *</label>
+                    <select class="form-control" [(ngModel)]="form.refid" *ngIf="form.descalcance === 'PRODUCTO'">
+                        <option [ngValue]="null">-- Seleccione producto --</option>
+                        <option *ngFor="let p of productos" [ngValue]="p.prodid">{{ p.prodnombre }}</option>
+                    </select>
+                    <select class="form-control" [(ngModel)]="form.refid" *ngIf="form.descalcance === 'CATEGORIA'">
+                        <option [ngValue]="null">-- Seleccione categoría --</option>
+                        <option *ngFor="let c of categorias" [ngValue]="c.catid">{{ c.catnombre }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Porcentaje de descuento (%) *</label>
+                <input type="number" class="form-control" min="0.01" max="100" step="0.01"
+                    [(ngModel)]="form.descporcentaje">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Fecha inicio *</label>
+                    <input type="date" class="form-control" [(ngModel)]="form.descfechainicio">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fecha fin *</label>
+                    <input type="date" class="form-control" [(ngModel)]="form.descfechafin">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                <button class="btn btn-primary" (click)="guardar()">
+                    {{ editando ? 'Actualizar' : 'Crear' }} Descuento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -49,7 +49,10 @@
                         <td>
                             <div class="action-btns">
                                 <button class="btn btn-sm btn-secondary" (click)="abrirModal(p)">Editar</button>
-                                <button class="btn btn-sm btn-info" (click)="abrirModalProveedores(p)">🚚</button>
+                                <button class="btn btn-sm btn-info" (click)="abrirModalProveedores(p)"
+                                    title="Proveedores">🚚</button>
+                                <button class="btn btn-sm btn-warning" (click)="abrirKardex(p)"
+                                    title="Kardex">📊</button>
                                 <button class="btn btn-sm btn-danger" (click)="eliminar(p)">X</button>
                             </div>
                         </td>
@@ -183,6 +186,51 @@
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="cerrarModalProveedores()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL KARDEX ===== -->
+    <div class="modal-backdrop" *ngIf="modalKardexOpen" (click)="cerrarKardex()">
+        <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>📊 Kardex — {{ productoKardex?.prodnombre }}</h3>
+                <button class="modal-close" (click)="cerrarKardex()">&times;</button>
+            </div>
+
+            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Saldo Ant.</th>
+                            <th>Saldo Act.</th>
+                            <th>Documento</th>
+                            <th>Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let k of kardexData">
+                            <td>{{ k.karfecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                            <td><span class="badge" [ngClass]="getKardexBadge(k.kartipo)">{{ k.kartipo }}</span></td>
+                            <td><strong>{{ k.karcantidad }}</strong></td>
+                            <td>{{ k.karsaldo_anterior }}</td>
+                            <td>{{ k.karsaldo_actual }}</td>
+                            <td><small>{{ k.karref_documento || '-' }}</small></td>
+                            <td><small>{{ k.karobservacion || '-' }}</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="kardexData.length === 0" class="empty-state">
+                    No hay movimientos registrados para este producto
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="cerrarKardex()">Cerrar</button>
             </div>
         </div>
     </div>

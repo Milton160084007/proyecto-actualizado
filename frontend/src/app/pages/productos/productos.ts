@@ -207,4 +207,34 @@ export class Productos implements OnInit {
             });
         }
     }
+
+    // ===== MODAL KARDEX =====
+    modalKardexOpen = false;
+    productoKardex: any = null;
+    kardexData: any[] = [];
+
+    abrirKardex(producto: any) {
+        this.productoKardex = producto;
+        this.kardexData = [];
+        this.modalKardexOpen = true;
+        this.api.getMovimientosKardex(producto.prodid).subscribe({
+            next: (data) => { this.kardexData = data; this.cd.detectChanges(); },
+            error: (err) => console.error('Error cargando kardex', err)
+        });
+    }
+
+    cerrarKardex() {
+        this.modalKardexOpen = false;
+        this.productoKardex = null;
+    }
+
+    getKardexBadge(tipo: string): string {
+        const map: Record<string, string> = {
+            'COMPRA': 'badge-success', 'VENTA': 'badge-info',
+            'AJUSTE_ENTRADA': 'badge-warning', 'AJUSTE_SALIDA': 'badge-danger',
+            'DEVOLUCION': 'badge-secondary', 'CADUCIDAD': 'badge-danger'
+        };
+        return map[tipo] || 'badge-info';
+    }
 }
+

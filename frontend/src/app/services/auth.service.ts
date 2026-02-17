@@ -58,9 +58,9 @@ export class AuthService {
         const rol = this.usuario.rolnombre;
 
         const permisos: Record<string, string[]> = {
-            'Administrador': ['dashboard', 'productos', 'categorias', 'movimientos', 'proveedores', 'clientes', 'ventas', 'usuarios', 'reportes'],
+            'Administrador': ['dashboard', 'productos', 'categorias', 'movimientos', 'proveedores', 'clientes', 'ventas', 'usuarios', 'reportes', 'compras', 'descuentos'],
             'Cajero': ['dashboard', 'ventas', 'movimientos', 'clientes', 'productos'],
-            'Bodeguero': ['dashboard', 'productos', 'movimientos', 'categorias', 'proveedores']
+            'Bodeguero': ['dashboard', 'productos', 'movimientos', 'categorias', 'proveedores', 'compras']
         };
 
         return permisos[rol]?.includes(modulo) || false;

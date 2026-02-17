@@ -194,17 +194,9 @@ export class ApiService {
     }
 
     // Alias para compatibilidad
-    getSalidas(): Observable<any> {
-        return this.getVentas();
-    }
-
-    getSalida(id: number): Observable<any> {
-        return this.getVenta(id);
-    }
-
-    createSalida(data: any): Observable<any> {
-        return this.createVenta(data);
-    }
+    getSalidas(): Observable<any> { return this.getVentas(); }
+    getSalida(id: number): Observable<any> { return this.getVenta(id); }
+    createSalida(data: any): Observable<any> { return this.createVenta(data); }
 
     // =====================================================
     // CLIENTES
@@ -286,6 +278,26 @@ export class ApiService {
         return this.http.get(`${this.baseUrl}/descuentos`);
     }
 
+    getDescuento(id: number): Observable<any> {
+        return this.http.get(`${this.baseUrl}/descuentos/${id}`);
+    }
+
+    createDescuento(data: any): Observable<any> {
+        return this.http.post(`${this.baseUrl}/descuentos`, data);
+    }
+
+    updateDescuento(id: number, data: any): Observable<any> {
+        return this.http.put(`${this.baseUrl}/descuentos/${id}`, data);
+    }
+
+    deleteDescuento(id: number): Observable<any> {
+        return this.http.delete(`${this.baseUrl}/descuentos/${id}`);
+    }
+
+    getDescuentosProducto(prodid: number): Observable<any> {
+        return this.http.get(`${this.baseUrl}/descuentos/producto/${prodid}`);
+    }
+
     // =====================================================
     // USUARIOS
     // =====================================================
@@ -322,5 +334,12 @@ export class ApiService {
 
     getTopProductos(periodo: 'diario' | 'semanal' | 'mensual' | 'historico'): Observable<any> {
         return this.http.get(`${this.baseUrl}/reportes/top-productos/${periodo}`);
+    }
+
+    // =====================================================
+    // NOTIFICACIONES (alertas)
+    // =====================================================
+    getNotificaciones(): Observable<any> {
+        return this.http.get(`${this.baseUrl}/productos/alertas/stock-bajo`);
     }
 }

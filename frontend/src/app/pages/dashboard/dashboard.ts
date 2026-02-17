@@ -15,6 +15,7 @@ export class Dashboard implements OnInit {
     stockBajo: any[] = [];
     proximosVencer: any[] = [];
     movimientosRecientes: any[] = [];
+    ventasHoy = 0;
 
     resumen = {
         totalProductos: 0,
@@ -31,6 +32,7 @@ export class Dashboard implements OnInit {
     ngOnInit() {
         this.cargarDatos();
         this.verificarAPI();
+        this.cargarVentasHoy();
     }
 
     async verificarAPI() {
@@ -44,6 +46,18 @@ export class Dashboard implements OnInit {
         });
     }
 
+    cargarVentasHoy() {
+        this.api.getVentas().subscribe({
+            next: (ventas) => {
+                const hoy = new Date().toISOString().split('T')[0];
+                this.ventasHoy = ventas.filter((v: any) =>
+                    v.salfecha?.startsWith(hoy) || v.karfecha?.startsWith(hoy)
+                ).length;
+            },
+            error: () => { this.ventasHoy = 0; }
+        });
+    }
+
     cargarDatos() {
         this.loading = true;
 
@@ -53,7 +67,7 @@ export class Dashboard implements OnInit {
                     totalProductos: data.totalProductos,
                     valorInventario: data.valorInventario,
                     alertasStock: data.alertasStockBajo,
-                    movimientosHoy: data.productosProximosVencer // Usando este campo temporalmente o ajustar el HTML
+                    movimientosHoy: data.productosProximosVencer
                 };
 
                 // Listas de alertas

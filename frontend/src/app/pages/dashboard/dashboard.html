@@ -38,12 +38,12 @@
             </div>
         </div>
 
-        <!-- Movimientos Hoy (Simulado) -->
+        <!-- Ventas del Día -->
         <div class="card stat-card">
-            <div class="stat-icon bg-info-light text-info">📊</div>
+            <div class="stat-icon bg-info-light text-info">🛒</div>
             <div class="stat-info">
-                <span class="stat-label">Movimientos Hoy</span>
-                <span class="stat-value">{{ resumen.movimientosHoy }}</span>
+                <span class="stat-label">Ventas Hoy</span>
+                <span class="stat-value">{{ ventasHoy }}</span>
             </div>
         </div>
     </section>
@@ -113,15 +113,32 @@
                 </ul>
             </div>
 
+            <!-- Productos Próximos a Vencer -->
+            <div class="card" *ngIf="proximosVencer.length > 0">
+                <div class="card-header">
+                    <h3 class="text-warning">⏰ Próximos a Vencer</h3>
+                </div>
+                <ul class="list-group">
+                    <li *ngFor="let item of proximosVencer.slice(0, 5)"
+                        class="list-item flex-between p-2 border-bottom">
+                        <div>
+                            <div class="font-medium">{{ item.prodnombre || item.nombre }}</div>
+                            <div class="text-xs text-muted">Lote: {{ item.lotnumero || 'N/A' }}</div>
+                        </div>
+                        <span class="badge badge-warning">{{ item.lotfecha_vencimiento | date:'dd/MM/yyyy' }}</span>
+                    </li>
+                </ul>
+            </div>
+
             <!-- Acciones Rápidas -->
             <div class="card">
                 <h3>Acciones Rápidas</h3>
                 <div class="grid grid-2 mt-2">
-                    <a routerLink="/movimientos" class="btn btn-success btn-block">
-                        + Registrar Entrada
+                    <a routerLink="/compras" class="btn btn-success btn-block">
+                        + Registrar Compra
                     </a>
-                    <a routerLink="/movimientos" class="btn btn-primary btn-block">
-                        - Registrar Salida
+                    <a routerLink="/ventas" class="btn btn-primary btn-block">
+                        + Nueva Venta
                     </a>
                 </div>
                 <div class="mt-2">

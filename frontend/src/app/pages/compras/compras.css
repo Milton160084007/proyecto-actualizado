@@ -1,0 +1,171 @@
+.page-compras {
+    animation: fadeIn 0.4s ease;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.d-block {
+    display: block;
+}
+
+/* Layout compra */
+.compra-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1.5rem;
+}
+
+.prov-det {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--surface-hover, #f0f4ff);
+    border-radius: 6px;
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    z-index: 20;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.result-item:hover {
+    background: var(--surface-hover, #f0f4ff);
+}
+
+.items-list {
+    padding: 10px;
+}
+
+.compra-item {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--surface-hover, #f8f9ff);
+}
+
+.compra-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.compra-item-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.compra-item-body .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.compra-item-body .campo label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.compra-item-body .campo input {
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.compra-item-body .campo.total {
+    grid-column: span 2;
+    text-align: right;
+    font-size: 1rem;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: var(--color-danger, #ef4444);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.btn-remove:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.empty-carrito {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.compra-resumen {
+    padding: 15px;
+    border-top: 2px solid var(--border-color);
+}
+
+.resumen-linea {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.resumen-total {
+    font-size: 1.2rem;
+    color: var(--color-primary, #4f46e5);
+}
+
+.btn-procesar {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .compra-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .compra-item-body {
+        grid-template-columns: 1fr;
+    }
+}
