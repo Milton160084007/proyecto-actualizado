@@ -1,0 +1,100 @@
+<div class="page-clientes">
+    <header class="page-header">
+        <h1>🧑‍💼 Clientes</h1>
+        <button class="btn btn-primary" (click)="abrirModal()">+ Nuevo Cliente</button>
+    </header>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-bar">
+        <input type="text" class="form-control" placeholder="Buscar por nombre, CI/RUC o email..." [(ngModel)]="filtro">
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>CI/RUC</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let c of clientesFiltrados">
+                        <td><strong>{{ c.clinombre }}</strong></td>
+                        <td>{{ c.clicidruc }}</td>
+                        <td>{{ c.clidireccion || '-' }}</td>
+                        <td>{{ c.clitelefono || '-' }}</td>
+                        <td>{{ c.cliemail || '-' }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-sm btn-secondary" (click)="abrirModal(c)">Editar</button>
+                                <button class="btn btn-sm btn-danger" (click)="eliminar(c)">X</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div *ngIf="clientesFiltrados.length === 0 && !loading" class="empty-state">
+                No hay clientes registrados
+            </div>
+            <div *ngIf="loading" class="empty-state">Cargando...</div>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar -->
+    <div class="modal-backdrop" *ngIf="modalOpen" (click)="cerrarModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ editando ? 'Editar' : 'Nuevo' }} Cliente</h3>
+                <button class="modal-close" (click)="cerrarModal()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="guardar()">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" [(ngModel)]="clienteActual.clinombre" name="clinombre"
+                            required placeholder="Nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CI/RUC *</label>
+                        <input type="text" class="form-control" [(ngModel)]="clienteActual.clicidruc" name="clicidruc"
+                            required placeholder="Cédula o RUC">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" class="form-control" [(ngModel)]="clienteActual.clidireccion" name="clidireccion"
+                        placeholder="Dirección del cliente">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" [(ngModel)]="clienteActual.clitelefono"
+                            name="clitelefono" placeholder="Número de teléfono">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" [(ngModel)]="clienteActual.cliemail" name="cliemail"
+                            placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        {{ editando ? 'Guardar Cambios' : 'Crear Cliente' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

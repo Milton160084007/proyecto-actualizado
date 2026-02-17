@@ -28,6 +28,16 @@
         🏷️ Categorías
       </a>
 
+      <a routerLink="/ventas" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('ventas')"
+        (click)="menuOpen = false">
+        🧾 Ventas
+      </a>
+
+      <a routerLink="/clientes" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('clientes')"
+        (click)="menuOpen = false">
+        🧑‍💼 Clientes
+      </a>
+
       <a routerLink="/movimientos" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('movimientos')"
         (click)="menuOpen = false">
         📋 Movimientos
@@ -36,6 +46,16 @@
       <a routerLink="/proveedores" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('proveedores')"
         (click)="menuOpen = false">
         🚚 Proveedores
+      </a>
+
+      <a routerLink="/reportes" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('reportes')"
+        (click)="menuOpen = false">
+        📈 Reportes
+      </a>
+
+      <a routerLink="/usuarios" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('usuarios')"
+        (click)="menuOpen = false">
+        👥 Usuarios
       </a>
     </nav>
 

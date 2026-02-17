@@ -312,4 +312,15 @@ export class ApiService {
     deleteUsuario(id: number): Observable<any> {
         return this.http.delete(`${this.baseUrl}/usuarios/${id}`);
     }
+
+    // =====================================================
+    // REPORTES
+    // =====================================================
+    getVentasReporte(periodo: 'diario' | 'semanal' | 'mensual'): Observable<any> {
+        return this.http.get(`${this.baseUrl}/reportes/ventas/${periodo}`);
+    }
+
+    getTopProductos(periodo: 'diario' | 'semanal' | 'mensual' | 'historico'): Observable<any> {
+        return this.http.get(`${this.baseUrl}/reportes/top-productos/${periodo}`);
+    }
 }

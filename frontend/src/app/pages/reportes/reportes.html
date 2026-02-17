@@ -1,0 +1,90 @@
+<div class="container fade-in">
+  <div class="header" style="display: flex; justify-content: space-between; align-items: center">
+    <div>
+      <h1>Reportes de Ventas</h1>
+      <p>Visualiza el rendimiento de tu negocio</p>
+    </div>
+    <button class="btn btn-primary" (click)="exportarPDF()">📄 Exportar PDF</button>
+  </div>
+
+  <!-- Selector de Periodo -->
+  <div class="filters">
+    <button class="btn" [class.btn-primary]="periodoActual === 'diario'" (click)="cambiarPeriodo('diario')">
+      Diario
+    </button>
+    <button class="btn" [class.btn-primary]="periodoActual === 'semanal'" (click)="cambiarPeriodo('semanal')">
+      Semanal
+    </button>
+    <button class="btn" [class.btn-primary]="periodoActual === 'mensual'" (click)="cambiarPeriodo('mensual')">
+      Mensual
+    </button>
+  </div>
+
+  <!-- Tarjetas de Resumen -->
+  <div class="dashboard-grid">
+    <div class="card stat-card">
+      <h3>Ventas Totales</h3>
+      <div class="value">{{ resumen?.total_ventas | currency }}</div>
+      <p class="subtitle">{{ getPeriodoLabel() }}</p>
+    </div>
+
+    <div class="card stat-card">
+      <h3>Transacciones</h3>
+      <div class="value">{{ resumen?.total_transacciones }}</div>
+      <p class="subtitle">Facturas generadas</p>
+    </div>
+
+    <div class="card stat-card">
+      <h3>IVA Recaudado</h3>
+      <div class="value">{{ resumen?.total_iva | currency }}</div>
+      <p class="subtitle">15% Impuesto</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- Tabla de Top Productos -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Productos Más Vendidos</h2>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Código</th>
+              <th>Cantidad</th>
+              <th>Ingresos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let prod of topProductos">
+              <td>{{ prod.prodnombre }}</td>
+              <td>{{ prod.prodcodigo }}</td>
+              <td>{{ prod.cantidad_vendida }}</td>
+              <td>{{ prod.total_ingresos | currency }}</td>
+            </tr>
+            <tr *ngIf="topProductos.length === 0">
+              <td colspan="4" class="text-center">No hay datos para este periodo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Gráfico Simple (Barras CSS) si es semanal/mensual -->
+    <div class="card" *ngIf="periodoActual !== 'diario' && detalleDias.length > 0">
+      <div class="card-header">
+        <h2>Tendencia de Ventas</h2>
+      </div>
+      <div class="chart-container">
+        <div class="bar-chart">
+          <div *ngFor="let dia of detalleDias" class="bar-group">
+            <div class="bar" [style.height.px]="calculateHeight(dia.total)" [title]="dia.total | currency"></div>
+            <div class="label">{{ dia.fecha | date:'dd/MM' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

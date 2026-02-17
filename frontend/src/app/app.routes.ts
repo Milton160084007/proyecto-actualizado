@@ -32,6 +32,26 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/proveedores/proveedores').then(m => m.Proveedores)
     },
     {
+        path: 'reportes',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/reportes/reportes').then(m => m.ReportesComponent)
+    },
+    {
+        path: 'usuarios',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/usuarios/usuarios').then(m => m.UsuariosComponent)
+    },
+    {
+        path: 'ventas',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/ventas/ventas').then(m => m.VentasComponent)
+    },
+    {
+        path: 'clientes',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/clientes/clientes').then(m => m.ClientesComponent)
+    },
+    {
         path: '**',
         redirectTo: ''
     }

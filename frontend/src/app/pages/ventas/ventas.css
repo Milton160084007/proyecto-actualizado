@@ -1,0 +1,234 @@
+.page-ventas {
+    padding: 0;
+}
+
+/* Layout POS */
+.venta-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .venta-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.venta-panel-izq .card {
+    margin-bottom: 15px;
+}
+
+/* Search */
+.search-container {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color, #eee);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.result-item:hover {
+    background: var(--surface-hover, #f0f4ff);
+}
+
+.producto-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.prod-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.prod-precio {
+    font-weight: 700;
+    color: var(--primary-color, #4f46e5);
+    white-space: nowrap;
+}
+
+/* Cliente seleccionado */
+.cliente-seleccionado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: var(--surface-hover, #f0f4ff);
+    border-radius: 6px;
+    border-left: 4px solid var(--primary-color, #4f46e5);
+}
+
+.cliente-seleccionado div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Carrito */
+.carrito-card {
+    position: sticky;
+    top: 20px;
+}
+
+.carrito-items {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+
+.carrito-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+
+.carrito-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.btn-remove:hover {
+    background: #fef2f2;
+}
+
+.carrito-item-body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.carrito-item-body .campo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.carrito-item-body .campo label {
+    color: var(--text-secondary, #888);
+    font-size: 0.75rem;
+}
+
+.carrito-item-body .campo input {
+    width: 60px;
+    padding: 3px 6px;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.carrito-item-body .campo.total {
+    margin-left: auto;
+    color: var(--primary-color, #4f46e5);
+}
+
+.empty-carrito {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-tertiary, #aaa);
+    font-style: italic;
+}
+
+/* Resumen */
+.carrito-resumen {
+    border-top: 2px solid var(--border-color, #ddd);
+    padding: 15px;
+}
+
+.resumen-linea {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #666);
+}
+
+.resumen-total {
+    font-size: 1.2rem;
+    color: var(--text-primary, #111);
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color, #ddd);
+    margin-top: 5px;
+}
+
+.btn-procesar {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    font-size: 1.1rem;
+}
+
+/* Historial row anulada */
+tr.anulada {
+    opacity: 0.5;
+}
+
+/* Modal detalle */
+.modal-lg {
+    max-width: 800px;
+    width: 90%;
+}
+
+.detalle-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.detalle-tabla {
+    width: 100%;
+    font-size: 0.85rem;
+}
+
+.detalle-totales {
+    text-align: right;
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+.detalle-totales div {
+    margin: 4px 0;
+}
+
+.total-final {
+    font-size: 1.3rem;
+    color: var(--primary-color, #4f46e5);
+    margin-top: 8px;
+}

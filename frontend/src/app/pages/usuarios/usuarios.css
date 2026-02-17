@@ -1,0 +1,47 @@
+.page-usuarios {
+    padding: 0;
+}
+
+.badge-admin {
+    background: #7c3aed;
+    color: white;
+}
+
+.badge-cajero {
+    background: #2563eb;
+    color: white;
+}
+
+.badge-bodeguero {
+    background: #059669;
+    color: white;
+}
+
+.btn-warning {
+    background: #d97706;
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover {
+    background: #b45309;
+}
+
+.rol-info {
+    margin: 10px 0 15px;
+}
+
+.info-box {
+    background: var(--surface-hover, #f0f4ff);
+    border-left: 4px solid var(--primary-color, #4f46e5);
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #555);
+}
+
+.password-info {
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    color: var(--text-secondary, #666);
+}

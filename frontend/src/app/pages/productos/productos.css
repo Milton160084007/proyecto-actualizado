@@ -88,3 +88,53 @@ textarea.form-control {
         max-width: 100%;
     }
 }
+
+/* Proveedor Modal */
+.btn-info {
+    background: #0891b2;
+    color: white;
+    border: none;
+}
+
+.btn-info:hover {
+    background: #0e7490;
+}
+
+.proveedores-lista {
+    margin-bottom: 20px;
+}
+
+.proveedores-lista h4,
+.asignar-proveedor h4 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    color: var(--text-secondary, #555);
+}
+
+.proveedor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface-hover, #f0f4ff);
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.prov-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.empty-mini {
+    color: var(--text-tertiary, #aaa);
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 10px 0;
+}
+
+.asignar-proveedor {
+    border-top: 1px solid var(--border-color, #ddd);
+    padding-top: 15px;
+}

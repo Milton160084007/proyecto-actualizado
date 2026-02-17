@@ -1,0 +1,246 @@
+<div class="page-ventas">
+
+    <!-- ====== VISTA: HISTORIAL ====== -->
+    <div *ngIf="vistaActual === 'historial'">
+        <header class="page-header">
+            <h1>🧾 Ventas / Facturación</h1>
+            <button class="btn btn-primary" (click)="iniciarNuevaVenta()">+ Nueva Venta</button>
+        </header>
+
+        <div class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Cajero</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let v of ventas" [class.anulada]="v.venestado === 'ANULADA'">
+                            <td><strong>{{ v.vennumero }}</strong></td>
+                            <td>{{ v.venfecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                            <td>{{ v.clinombre }}</td>
+                            <td>{{ v.usuusuario }}</td>
+                            <td><strong>$ {{ v.ventotal | number:'1.2-2' }}</strong></td>
+                            <td>
+                                <span class="badge"
+                                    [ngClass]="v.venestado === 'PAGADA' ? 'badge-success' : 'badge-danger'">
+                                    {{ v.venestado }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-sm btn-secondary" (click)="verDetalle(v)">👁️ Ver</button>
+                                    <button class="btn btn-sm btn-danger" (click)="anularVenta(v)"
+                                        *ngIf="v.venestado === 'PAGADA'">
+                                        ❌ Anular
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="ventas.length === 0 && !loading" class="empty-state">
+                    No hay ventas registradas
+                </div>
+                <div *ngIf="loading" class="empty-state">Cargando...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== VISTA: NUEVA VENTA ====== -->
+    <div *ngIf="vistaActual === 'nueva'">
+        <header class="page-header">
+            <h1>🛒 Nueva Venta</h1>
+            <button class="btn btn-secondary" (click)="volverHistorial()">← Volver al Historial</button>
+        </header>
+
+        <div class="venta-layout">
+            <!-- Panel Izquierdo: Cliente + Productos -->
+            <div class="venta-panel-izq">
+
+                <!-- Seleccionar Cliente -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>👤 Cliente</h3>
+                    </div>
+                    <div class="card-body">
+                        <div *ngIf="clienteSeleccionado" class="cliente-seleccionado">
+                            <div>
+                                <strong>{{ clienteSeleccionado.clinombre }}</strong>
+                                <small>CI/RUC: {{ clienteSeleccionado.clicidruc }}</small>
+                            </div>
+                            <button class="btn btn-sm btn-secondary"
+                                (click)="clienteSeleccionado = null">Cambiar</button>
+                        </div>
+
+                        <div *ngIf="!clienteSeleccionado" class="search-container">
+                            <input type="text" class="form-control" placeholder="Buscar cliente por nombre o CI/RUC..."
+                                [(ngModel)]="busquedaCliente">
+                            <div class="search-results" *ngIf="clientesFiltrados.length > 0">
+                                <div *ngFor="let c of clientesFiltrados" class="result-item"
+                                    (click)="seleccionarCliente(c)">
+                                    <strong>{{ c.clinombre }}</strong>
+                                    <small>{{ c.clicidruc }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buscar Producto -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📦 Agregar Productos</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-container">
+                            <input type="text" class="form-control" placeholder="Buscar producto por nombre o código..."
+                                [(ngModel)]="busquedaProducto" (input)="buscarProducto()">
+                            <div class="search-results" *ngIf="productosFiltrados.length > 0">
+                                <div *ngFor="let p of productosFiltrados" class="result-item producto-item"
+                                    (click)="agregarAlCarrito(p)">
+                                    <div class="prod-info">
+                                        <strong>{{ p.prodnombre }}</strong>
+                                        <small>{{ p.prodcodigo }} | Stock: {{ p.prodstock_global }}</small>
+                                    </div>
+                                    <div class="prod-precio">$ {{ p.prodprecio_venta | number:'1.2-2' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Derecho: Carrito -->
+            <div class="venta-panel-der">
+                <div class="card carrito-card">
+                    <div class="card-header">
+                        <h3>🛒 Detalle de Venta</h3>
+                    </div>
+
+                    <div class="carrito-items">
+                        <div *ngFor="let item of carrito; let i = index" class="carrito-item">
+                            <div class="carrito-item-header">
+                                <strong>{{ item.prodnombre }}</strong>
+                                <button class="btn-remove" (click)="quitarDelCarrito(i)">✕</button>
+                            </div>
+                            <div class="carrito-item-body">
+                                <div class="campo">
+                                    <label>Cant:</label>
+                                    <input type="number" min="1" [max]="item.stock_disponible"
+                                        [(ngModel)]="item.cantidad" (change)="actualizarCantidad(item)">
+                                </div>
+                                <div class="campo">
+                                    <label>P.Unit:</label>
+                                    <span>$ {{ item.precio_unitario | number:'1.2-2' }}</span>
+                                </div>
+                                <div class="campo">
+                                    <label>Desc:</label>
+                                    <input type="number" min="0" step="0.01" [(ngModel)]="item.descuento"
+                                        (change)="recalcularLinea(item)">
+                                </div>
+                                <div class="campo total">
+                                    <strong>$ {{ item.total | number:'1.2-2' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="carrito.length === 0" class="empty-carrito">
+                            Agregue productos a la venta
+                        </div>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div class="carrito-resumen" *ngIf="carrito.length > 0">
+                        <div class="resumen-linea">
+                            <span>Subtotal:</span>
+                            <span>$ {{ subtotalGeneral | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea">
+                            <span>IVA ({{ porcentajeIva }}%):</span>
+                            <span>$ {{ totalIva | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea resumen-total">
+                            <strong>TOTAL:</strong>
+                            <strong>$ {{ totalGeneral | number:'1.2-2' }}</strong>
+                        </div>
+                        <button class="btn btn-primary btn-procesar" (click)="procesarVenta()"
+                            [disabled]="!clienteSeleccionado || carrito.length === 0">
+                            💰 Procesar Venta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MODAL: DETALLE DE VENTA ====== -->
+    <div class="modal-backdrop" *ngIf="modalDetalleOpen" (click)="cerrarDetalle()">
+        <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>📄 Detalle de Venta {{ ventaDetalle?.vennumero }}</h3>
+                <button class="modal-close" (click)="cerrarDetalle()">&times;</button>
+            </div>
+
+            <div *ngIf="ventaDetalle" class="detalle-venta">
+                <div class="detalle-info">
+                    <div><strong>Cliente:</strong> {{ ventaDetalle.clinombre }} ({{ ventaDetalle.clicidruc }})</div>
+                    <div><strong>Cajero:</strong> {{ ventaDetalle.usuusuario }}</div>
+                    <div><strong>Fecha:</strong> {{ ventaDetalle.venfecha | date:'dd/MM/yyyy HH:mm' }}</div>
+                    <div><strong>Estado:</strong>
+                        <span class="badge"
+                            [ngClass]="ventaDetalle.venestado === 'PAGADA' ? 'badge-success' : 'badge-danger'">
+                            {{ ventaDetalle.venestado }}
+                        </span>
+                    </div>
+                </div>
+
+                <table class="detalle-tabla">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Código</th>
+                            <th>Cant.</th>
+                            <th>P. Unit.</th>
+                            <th>Desc.</th>
+                            <th>Subtotal</th>
+                            <th>IVA</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let d of ventaDetalle.detalles">
+                            <td>{{ d.prodnombre }}</td>
+                            <td>{{ d.prodcodigo }}</td>
+                            <td>{{ d.vdetcantidad }}</td>
+                            <td>$ {{ d.vdetprecio_unitario | number:'1.2-2' }}</td>
+                            <td>$ {{ d.vdetdescuento | number:'1.2-2' }}</td>
+                            <td>$ {{ d.vdetsubtotal | number:'1.2-2' }}</td>
+                            <td>$ {{ d.vdetiva | number:'1.2-2' }}</td>
+                            <td><strong>$ {{ d.vdettotal | number:'1.2-2' }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="detalle-totales">
+                    <div>Subtotal: <strong>$ {{ ventaDetalle.vensubtotal | number:'1.2-2' }}</strong></div>
+                    <div>IVA: <strong>$ {{ ventaDetalle.venmonto_iva | number:'1.2-2' }}</strong></div>
+                    <div class="total-final">Total: <strong>$ {{ ventaDetalle.ventotal | number:'1.2-2' }}</strong>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 15px; width: 100%;"
+                        (click)="generarFacturaPDF()">
+                        📄 Descargar Factura PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

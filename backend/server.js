@@ -35,6 +35,7 @@ app.use('/api/ventas', salidasRoutes);   // Alias: /api/ventas también funciona
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/movimientos', movimientosRoutes);
 app.use('/api/clientes', clientesRoutes);
+app.use('/api/reportes', require('./routes/reportes'));
 
 // =====================================================
 // RUTA: Health Check

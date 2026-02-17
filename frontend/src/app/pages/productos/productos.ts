@@ -18,10 +18,18 @@ export class Productos implements OnInit {
     filtro = '';
     loading = false;
 
-    // Modal
+    // Modal Crear/Editar
     modalOpen = false;
     editando = false;
     productoActual: any = this.nuevoProducto();
+
+    // Modal Proveedores
+    modalProveedoresOpen = false;
+    productoProveedores: any = null;
+    proveedoresDelProducto: any[] = [];
+    proveedorSeleccionado: number | null = null;
+    costoReferencia = 0;
+    diasEntrega = 1;
 
     constructor(private api: ApiService, private cd: ChangeDetectorRef) { }
 
@@ -137,5 +145,66 @@ export class Productos implements OnInit {
             p.prodnombre.toLowerCase().includes(term) ||
             p.prodcodigo.toLowerCase().includes(term)
         );
+    }
+
+    // ===== MODAL PROVEEDORES =====
+    abrirModalProveedores(producto: any) {
+        this.productoProveedores = producto;
+        this.proveedorSeleccionado = null;
+        this.costoReferencia = 0;
+        this.diasEntrega = 1;
+        this.cargarProveedoresProducto(producto.prodid);
+        this.modalProveedoresOpen = true;
+    }
+
+    cerrarModalProveedores() {
+        this.modalProveedoresOpen = false;
+        this.productoProveedores = null;
+        this.proveedoresDelProducto = [];
+    }
+
+    cargarProveedoresProducto(prodid: number) {
+        this.api.getProducto(prodid).subscribe({
+            next: (data) => {
+                this.proveedoresDelProducto = data.proveedores || [];
+                this.cd.detectChanges();
+            },
+            error: (err) => console.error('Error cargando proveedores del producto', err)
+        });
+    }
+
+    get proveedoresDisponibles(): any[] {
+        const idsAsignados = this.proveedoresDelProducto.map(p => p.provid);
+        return this.proveedores.filter(p => !idsAsignados.includes(p.provid));
+    }
+
+    asignarProveedor() {
+        if (!this.proveedorSeleccionado) {
+            alert('Seleccione un proveedor');
+            return;
+        }
+
+        this.api.asignarProveedorProducto(this.productoProveedores.prodid, {
+            provid: this.proveedorSeleccionado,
+            costo_referencia: this.costoReferencia,
+            dias_entrega: this.diasEntrega
+        }).subscribe({
+            next: () => {
+                this.cargarProveedoresProducto(this.productoProveedores.prodid);
+                this.proveedorSeleccionado = null;
+                this.costoReferencia = 0;
+                this.diasEntrega = 1;
+            },
+            error: (err) => alert('Error: ' + (err.error?.error || err.message))
+        });
+    }
+
+    quitarProveedor(ppid: number) {
+        if (confirm('¿Desvincular este proveedor del producto?')) {
+            this.api.quitarProveedorProducto(this.productoProveedores.prodid, ppid).subscribe({
+                next: () => this.cargarProveedoresProducto(this.productoProveedores.prodid),
+                error: (err) => alert('Error: ' + (err.error?.error || err.message))
+            });
+        }
     }
 }
