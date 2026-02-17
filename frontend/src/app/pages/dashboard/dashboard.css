@@ -1,0 +1,111 @@
+/* Estilos Específicos del Dashboard */
+.dashboard {
+    animation: fadeIn 0.4s ease;
+}
+
+/* Stat Cards específicos */
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Utilidades para iconos (que faltaban en global) */
+.bg-primary-light {
+    background-color: var(--primary-light);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.bg-success-light {
+    background-color: #dcfce7;
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.bg-danger-light {
+    background-color: #fee2e2;
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+.bg-info-light {
+    background-color: #e0f2fe;
+}
+
+.text-info {
+    color: var(--info);
+}
+
+.bg-warning-light {
+    background-color: #fef3c7;
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+/* Listas personalizadas */
+.list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-item {
+    transition: background-color 0.2s;
+}
+
+.list-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.width-100 {
+    width: 100%;
+}
+
+.btn-block {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}

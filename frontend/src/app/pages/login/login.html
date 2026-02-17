@@ -1,0 +1,42 @@
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-logo">🏪</div>
+            <h1>Micromercado Muñoz</h1>
+            <p>Sistema de Gestión de Inventario</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="login-form">
+            <div class="form-group">
+                <label class="form-label">Usuario</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" class="form-control" [(ngModel)]="usuario" name="usuario"
+                        placeholder="Ingresa tu usuario" autocomplete="username" autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" class="form-control" [(ngModel)]="contrasena" name="contrasena"
+                        placeholder="Ingresa tu contraseña" autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="error-message" *ngIf="error">
+                ⚠️ {{ error }}
+            </div>
+
+            <button type="submit" class="btn-login" [disabled]="loading">
+                <span *ngIf="!loading">Iniciar Sesión</span>
+                <span *ngIf="loading">Ingresando...</span>
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p>© 2026 Micromercado Muñoz</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+.page-productos {
+    animation: fadeIn 0.4s ease;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.search-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-bar input {
+    flex: 1;
+    max-width: 400px;
+}
+
+/* Tabla */
+tr.stock-bajo {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.d-block {
+    display: block;
+}
+
+.action-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* Modal */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* Loading */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .search-bar input {
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,135 @@
+<div class="dashboard fade-in">
+    <!-- Header de Página -->
+    <div class="page-header">
+        <h1>Dashboard General</h1>
+        <div class="header-actions">
+            <span class="badge badge-info">
+                {{ apiStatus }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Cards de Resumen -->
+    <section class="grid grid-4 mb-3">
+        <!-- Total Productos -->
+        <div class="card stat-card">
+            <div class="stat-icon bg-primary-light text-primary">📦</div>
+            <div class="stat-info">
+                <span class="stat-label">Total Productos</span>
+                <span class="stat-value">{{ resumen.totalProductos }}</span>
+            </div>
+        </div>
+
+        <!-- Valor Inventario -->
+        <div class="card stat-card">
+            <div class="stat-icon bg-success-light text-success">💰</div>
+            <div class="stat-info">
+                <span class="stat-label">Valor Inventario</span>
+                <span class="stat-value">$ {{ resumen.valorInventario | number:'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <!-- Alertas Stock -->
+        <div class="card stat-card" [class.border-danger]="resumen.alertasStock > 0">
+            <div class="stat-icon bg-danger-light text-danger">⚠️</div>
+            <div class="stat-info">
+                <span class="stat-label">Stock Bajo</span>
+                <span class="stat-value">{{ resumen.alertasStock }}</span>
+            </div>
+        </div>
+
+        <!-- Movimientos Hoy (Simulado) -->
+        <div class="card stat-card">
+            <div class="stat-icon bg-info-light text-info">📊</div>
+            <div class="stat-info">
+                <span class="stat-label">Movimientos Hoy</span>
+                <span class="stat-value">{{ resumen.movimientosHoy }}</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid grid-2">
+        <!-- Columna Izquierda: Movimientos Recientes -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Movimientos Recientes</h3>
+                <a routerLink="/movimientos" class="btn btn-sm btn-secondary">Ver Todo</a>
+            </div>
+
+            <div class="table-container">
+                <table *ngIf="movimientosRecientes.length > 0">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Producto/Detalle</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let mov of movimientosRecientes">
+                            <td>
+                                <span class="badge" [ngClass]="mov.tipo === 'ENTRADA' ? 'badge-success' : 'badge-info'">
+                                    {{ mov.tipo === 'ENTRADA' ? 'COMPRA' : 'VENTA' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="text-sm font-medium">{{ mov.detalle }}</div>
+                                <div class="text-xs text-muted">{{ mov.fecha | date:'dd MMM HH:mm' }}</div>
+                            </td>
+                            <td class="text-right font-bold">
+                                $ {{ mov.total | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="movimientosRecientes.length === 0" class="p-3 text-center text-muted">
+                    No hay movimientos recientes
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Alertas y Acciones -->
+        <div class="flex-column gap-2">
+
+            <!-- Productos con Stock Bajo -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-danger">⚠️ Alertas de Stock</h3>
+                </div>
+
+                <div *ngIf="stockBajo.length === 0" class="p-3 text-center text-success">
+                    ✅ Todo el inventario está saludable
+                </div>
+
+                <ul class="list-group" *ngIf="stockBajo.length > 0">
+                    <li *ngFor="let item of stockBajo.slice(0, 5)" class="list-item flex-between p-2 border-bottom">
+                        <div>
+                            <div class="font-medium">{{ item.nombre }}</div>
+                            <div class="text-xs text-muted">Mínimo: {{ item.stock_minimo }}</div>
+                        </div>
+                        <span class="badge badge-danger">{{ item.stock_actual }} un.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="card">
+                <h3>Acciones Rápidas</h3>
+                <div class="grid grid-2 mt-2">
+                    <a routerLink="/movimientos" class="btn btn-success btn-block">
+                        + Registrar Entrada
+                    </a>
+                    <a routerLink="/movimientos" class="btn btn-primary btn-block">
+                        - Registrar Salida
+                    </a>
+                </div>
+                <div class="mt-2">
+                    <a routerLink="/productos" class="btn btn-secondary btn-block width-100">
+                        📦 Gestionar Catálogo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

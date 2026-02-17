@@ -1,0 +1,48 @@
+<div class="page-categorias">
+    <header class="page-header">
+        <h1>Categorías</h1>
+        <button class="btn btn-primary" (click)="abrirModal()">+ Nueva Categoría</button>
+    </header>
+
+    <div class="grid grid-3">
+        <div class="card categoria-card" *ngFor="let cat of categorias">
+            <h4>{{ cat.catnombre }}</h4>
+            <p class="text-muted">{{ cat.catdescripcion || 'Sin descripción' }}</p>
+            <div class="card-actions">
+                <button class="btn btn-sm btn-secondary" (click)="abrirModal(cat)">Editar</button>
+                <button class="btn btn-sm btn-danger" (click)="eliminar(cat)">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="categorias.length === 0" class="empty-state card">
+        <p>No hay categorías. Crea una para organizar tus productos.</p>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" *ngIf="modalOpen" (click)="cerrarModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ editando ? 'Editar' : 'Nueva' }} Categoría</h3>
+                <button class="modal-close" (click)="cerrarModal()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="guardar()">
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" class="form-control" [(ngModel)]="categoriaActual.catnombre" name="catnombre"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción</label>
+                    <textarea class="form-control" [(ngModel)]="categoriaActual.catdescripcion" name="catdescripcion"
+                        rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

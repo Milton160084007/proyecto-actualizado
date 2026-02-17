@@ -1,0 +1,86 @@
+<!-- Si NO está logueado: solo mostrar el router (login page) -->
+<div *ngIf="!auth.isLoggedIn">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Si ESTÁ logueado: mostrar sidebar + contenido -->
+<div class="app-container" *ngIf="auth.isLoggedIn">
+
+  <!-- Sidebar Lateral -->
+  <aside class="sidebar" [class.active]="menuOpen">
+    <div class="sidebar-brand">
+      <span>🏪 Micromercado</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item"
+        (click)="menuOpen = false">
+        📊 Dashboard
+      </a>
+
+      <a routerLink="/productos" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('productos')"
+        (click)="menuOpen = false">
+        📦 Productos
+      </a>
+
+      <a routerLink="/categorias" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('categorias')"
+        (click)="menuOpen = false">
+        🏷️ Categorías
+      </a>
+
+      <a routerLink="/movimientos" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('movimientos')"
+        (click)="menuOpen = false">
+        📋 Movimientos
+      </a>
+
+      <a routerLink="/proveedores" routerLinkActive="active" class="nav-item" *ngIf="auth.tieneAcceso('proveedores')"
+        (click)="menuOpen = false">
+        🚚 Proveedores
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile-mini">
+        <div class="role-badge" [ngClass]="{
+                    'role-admin': auth.rolNombre === 'Administrador',
+                    'role-cajero': auth.rolNombre === 'Cajero',
+                    'role-bodeguero': auth.rolNombre === 'Bodeguero'
+                }">
+          {{ auth.rolNombre }}
+        </div>
+      </div>
+      <p>© 2026 Sistema Muñoz</p>
+    </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <div class="main-wrapper">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <button class="header-toggle" (click)="toggleMenu()">☰</button>
+
+      <div class="header-user">
+        <div class="user-info text-right">
+          <span class="user-name">{{ auth.usuario?.usuusuario }}</span>
+          <span class="user-role">{{ auth.rolNombre }}</span>
+        </div>
+        <div class="user-avatar" [ngClass]="{
+                    'avatar-admin': auth.rolNombre === 'Administrador',
+                    'avatar-cajero': auth.rolNombre === 'Cajero',
+                    'avatar-bodeguero': auth.rolNombre === 'Bodeguero'
+                }">{{ getIniciales() }}</div>
+        <button class="btn-logout" (click)="logout()" title="Cerrar Sesión">
+          🚪
+        </button>
+      </div>
+    </header>
+
+    <!-- Router Outlet -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

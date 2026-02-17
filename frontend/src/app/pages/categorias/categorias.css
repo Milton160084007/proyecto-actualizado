@@ -1,0 +1,51 @@
+.page-categorias {
+    animation: fadeIn 0.4s ease;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.categoria-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.categoria-card h4 {
+    margin-bottom: 0.5rem;
+}
+
+.categoria-card p {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+textarea.form-control {
+    resize: vertical;
+}

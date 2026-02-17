@@ -1,0 +1,180 @@
+<div class="page-movimientos">
+    <header class="page-header">
+        <h1>Movimientos de Inventario</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" (click)="cargarDatos()">Recargar</button>
+            <button class="btn btn-success" (click)="abrirModal('ENTRADA')">+ Compra</button>
+            <button class="btn btn-primary" (click)="abrirModal('SALIDA')">- Venta</button>
+        </div>
+    </header>
+
+    <!-- Historial del Kardex -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Kardex General</h3>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Saldo Ant.</th>
+                        <th>Saldo Act.</th>
+                        <th>Documento</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let m of movimientos">
+                        <td>{{ m.karfecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                        <td>
+                            <strong>{{ m.prodnombre }}</strong>
+                            <small class="text-muted d-block">{{ m.prodcodigo }}</small>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="getTipoBadgeClass(m.kartipo)">
+                                {{ m.kartipo }}
+                            </span>
+                        </td>
+                        <td>{{ m.karcantidad }}</td>
+                        <td>{{ m.karsaldo_anterior }}</td>
+                        <td>{{ m.karsaldo_actual }}</td>
+                        <td>{{ m.karref_documento || '-' }}</td>
+                        <td>{{ m.usuusuario || '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div *ngIf="movimientos.length === 0" class="empty-state">
+                No hay movimientos registrados
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Entrada/Salida -->
+    <div class="modal-backdrop" *ngIf="modalOpen">
+        <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>
+                    <span *ngIf="tipoMovimiento === 'ENTRADA'" class="text-success">+ Compra (Entrada)</span>
+                    <span *ngIf="tipoMovimiento === 'SALIDA'" class="text-primary">- Venta (Salida)</span>
+                </h3>
+                <button class="modal-close" (click)="cerrarModal()">&times;</button>
+            </div>
+
+            <!-- Resultado exitoso -->
+            <div *ngIf="resultado" class="resultado-box">
+                <div class="alert alert-success">
+                    <strong>{{ resultado.mensaje }}</strong>
+                </div>
+                <div *ngIf="resultado.items">
+                    <div *ngFor="let item of resultado.items" class="resultado-detalle">
+                        <p>Producto: {{ item.prodid }} • Cantidad: {{ item.cantidad }}</p>
+                        <p>Stock: {{ item.saldo_anterior }} → {{ item.saldo_nuevo }}</p>
+                    </div>
+                </div>
+                <div *ngIf="resultado.total">
+                    <p class="total">Total: <strong>$ {{ resultado.total | number:'1.2-2' }}</strong></p>
+                </div>
+                <button class="btn btn-primary" (click)="cerrarModal()">Cerrar</button>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!resultado" (ngSubmit)="registrar()">
+                <div class="form-group">
+                    <label class="form-label">Producto *</label>
+                    <select class="form-control" [(ngModel)]="movimientoActual.producto_id" name="producto_id"
+                        (change)="onProductoChange()" required>
+                        <option [value]="null">-- Seleccionar producto --</option>
+                        <option *ngFor="let p of productos" [value]="p.prodid">
+                            {{ p.prodcodigo }} - {{ p.prodnombre }} (Stock: {{ p.prodstock_global }})
+                        </option>
+                    </select>
+                </div>
+
+                <div class="producto-info" *ngIf="productoSeleccionado">
+                    <div class="info-item">
+                        <span class="label">Stock Actual:</span>
+                        <span class="value">{{ productoSeleccionado.prodstock_global }} uds</span>
+                    </div>
+                    <div class="info-item" *ngIf="tipoMovimiento === 'SALIDA'">
+                        <span class="label">Precio Venta:</span>
+                        <span class="value">$ {{ productoSeleccionado.prodprecio_venta | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Cantidad *</label>
+                        <input type="number" min="1" class="form-control" [(ngModel)]="movimientoActual.cantidad"
+                            name="cantidad" required>
+                    </div>
+
+                    <div class="form-group" *ngIf="tipoMovimiento === 'ENTRADA'">
+                        <label class="form-label">Costo Unitario $</label>
+                        <input type="number" step="0.01" class="form-control"
+                            [(ngModel)]="movimientoActual.costo_compra" name="costo_compra">
+                    </div>
+                </div>
+
+                <!-- Campos extra para entradas (lote) -->
+                <div class="form-row" *ngIf="tipoMovimiento === 'ENTRADA'">
+                    <div class="form-group">
+                        <label class="form-label">Nro. de Lote</label>
+                        <input type="text" class="form-control" [(ngModel)]="movimientoActual.nro_lote" name="nro_lote"
+                            placeholder="Opcional">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha Vencimiento</label>
+                        <input type="date" class="form-control" [(ngModel)]="movimientoActual.fecha_vencimiento"
+                            name="fecha_vencimiento">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observación</label>
+                    <input type="text" class="form-control" [(ngModel)]="movimientoActual.observacion"
+                        name="observacion" placeholder="Opcional">
+                </div>
+
+                <!-- Resumen de cálculo -->
+                <div class="calculo-resumen" *ngIf="productoSeleccionado && movimientoActual.cantidad > 0">
+                    <h4>Resumen</h4>
+                    <div class="resumen-linea" *ngIf="tipoMovimiento === 'ENTRADA'">
+                        <span>Total Compra:</span>
+                        <strong>$ {{ getTotal() | number:'1.2-2' }}</strong>
+                    </div>
+                    <div *ngIf="tipoMovimiento === 'SALIDA'">
+                        <div class="resumen-linea">
+                            <span>Subtotal:</span>
+                            <span>$ {{ (productoSeleccionado.prodprecio_venta * movimientoActual.cantidad) |
+                                number:'1.2-2'
+                                }}</span>
+                        </div>
+                        <div class="resumen-linea" *ngIf="productoSeleccionado.prodtiene_iva">
+                            <span>IVA (15%):</span>
+                            <span>$ {{ getIVA() | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea total">
+                            <span>TOTAL:</span>
+                            <strong>$ {{ getTotal() | number:'1.2-2' }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn"
+                        [ngClass]="tipoMovimiento === 'ENTRADA' ? 'btn-success' : 'btn-primary'" [disabled]="loading">
+                        {{ loading ? 'Procesando...' : 'Registrar ' + tipoMovimiento }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
