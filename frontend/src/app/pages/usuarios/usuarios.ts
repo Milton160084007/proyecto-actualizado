@@ -24,6 +24,7 @@ export class UsuariosComponent implements OnInit {
     modalPasswordOpen = false;
     passwordUsuarioId: number | null = null;
     passwordUsuarioNombre = '';
+    contrasenaActual = '';
     nuevaContrasena = '';
     confirmarContrasena = '';
 
@@ -150,30 +151,35 @@ export class UsuariosComponent implements OnInit {
     cerrarModalPassword() {
         this.modalPasswordOpen = false;
         this.passwordUsuarioId = null;
+        this.contrasenaActual = '';
         this.nuevaContrasena = '';
         this.confirmarContrasena = '';
     }
 
     cambiarContrasena() {
+        if (!this.contrasenaActual) {
+            alert('⚠️ Ingrese la contraseña actual para confirmar');
+            return;
+        }
         if (!this.nuevaContrasena) {
-            alert('Ingrese la nueva contraseña');
+            alert('⚠️ Ingrese la nueva contraseña');
             return;
         }
         if (this.nuevaContrasena !== this.confirmarContrasena) {
-            alert('Las contraseñas no coinciden');
+            alert('⚠️ Las contraseñas no coinciden');
             return;
         }
         if (this.nuevaContrasena.length < 5) {
-            alert('La contraseña debe tener al menos 5 caracteres');
+            alert('⚠️ La contraseña debe tener al menos 5 caracteres');
             return;
         }
 
-        this.api.cambiarContrasena(this.passwordUsuarioId!, this.nuevaContrasena).subscribe({
+        this.api.cambiarContrasena(this.passwordUsuarioId!, this.nuevaContrasena, this.contrasenaActual).subscribe({
             next: () => {
-                alert('Contraseña actualizada exitosamente');
+                alert('✅ Contraseña actualizada exitosamente');
                 this.cerrarModalPassword();
             },
-            error: (err) => alert('Error: ' + (err.error?.error || err.message))
+            error: (err) => alert('❌ Error: ' + (err.error?.error || err.message))
         });
     }
 

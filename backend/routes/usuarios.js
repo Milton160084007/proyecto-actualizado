@@ -118,7 +118,23 @@ router.put('/:id', async (req, res) => {
 // =====================================================
 router.put('/:id/password', async (req, res) => {
     try {
-        const { contrasena } = req.body;
+        const { contrasena, contrasenaActual } = req.body;
+
+        if (!contrasena) {
+            return res.status(400).json({ error: 'La nueva contraseña es obligatoria' });
+        }
+
+        // Verify current password if provided
+        if (contrasenaActual) {
+            const [check] = await pool.query(`
+                SELECT usuid FROM usuarios 
+                WHERE usuid = ? AND usucontrasena = SHA2(?, 256)
+            `, [req.params.id, contrasenaActual]);
+
+            if (check.length === 0) {
+                return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+            }
+        }
 
         await pool.query(`
             UPDATE usuarios SET usucontrasena = SHA2(?, 256) WHERE usuid = ?

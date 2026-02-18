@@ -317,8 +317,8 @@ export class ApiService {
         return this.http.put(`${this.baseUrl}/usuarios/${id}`, data);
     }
 
-    cambiarContrasena(id: number, contrasena: string): Observable<any> {
-        return this.http.put(`${this.baseUrl}/usuarios/${id}/password`, { contrasena });
+    cambiarContrasena(id: number, contrasena: string, contrasenaActual?: string): Observable<any> {
+        return this.http.put(`${this.baseUrl}/usuarios/${id}/password`, { contrasena, contrasenaActual });
     }
 
     deleteUsuario(id: number): Observable<any> {
@@ -341,5 +341,41 @@ export class ApiService {
     // =====================================================
     getNotificaciones(): Observable<any> {
         return this.http.get(`${this.baseUrl}/productos/alertas/stock-bajo`);
+    }
+
+    // =====================================================
+    // CONFIGURACION
+    // =====================================================
+    getConfiguracion(): Observable<any> {
+        return this.http.get(`${this.baseUrl}/configuracion`);
+    }
+
+    updateConfiguracion(data: any): Observable<any> {
+        return this.http.put(`${this.baseUrl}/configuracion`, data);
+    }
+
+    // =====================================================
+    // AUDITORIA
+    // =====================================================
+    getAuditoria(limit: number, offset: number): Observable<any> {
+        return this.http.get(`${this.baseUrl}/auditoria?limit=${limit}&offset=${offset}`);
+    }
+
+    // =====================================================
+    // DEVOLUCIONES
+    // =====================================================
+    getDevoluciones(): Observable<any> {
+        return this.http.get(`${this.baseUrl}/devoluciones`);
+    }
+
+    createDevolucion(data: any): Observable<any> {
+        return this.http.post(`${this.baseUrl}/devoluciones`, data);
+    }
+
+    // =====================================================
+    // BUSQUEDA GLOBAL
+    // =====================================================
+    busquedaGlobal(query: string): Observable<any> {
+        return this.http.get(`${this.baseUrl}/devoluciones/busqueda?q=${encodeURIComponent(query)}`);
     }
 }

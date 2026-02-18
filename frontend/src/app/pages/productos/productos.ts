@@ -101,6 +101,19 @@ export class Productos implements OnInit {
     }
 
     guardar() {
+        if (!this.productoActual.catid) {
+            alert('⚠️ Seleccione una categoría');
+            return;
+        }
+        if (!this.productoActual.prodcodigo || !this.productoActual.prodnombre) {
+            alert('⚠️ Complete los campos obligatorios (código y nombre)');
+            return;
+        }
+        if (!this.productoActual.prodprecio_venta || this.productoActual.prodprecio_venta <= 0) {
+            alert('⚠️ Ingrese un precio de venta válido');
+            return;
+        }
+
         const dataToSend = {
             catid: this.productoActual.catid,
             codigo: this.productoActual.prodcodigo,

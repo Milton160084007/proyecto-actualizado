@@ -25,6 +25,29 @@ router.get('/', async (req, res) => {
 });
 
 // =====================================================
+// OBTENER DESCUENTOS ACTIVOS PARA UN PRODUCTO
+// (DEBE IR ANTES de /:id para evitar conflicto de rutas)
+// =====================================================
+router.get('/producto/:prodid', async (req, res) => {
+    try {
+        const [descuentos] = await pool.query(`
+            SELECT d.* FROM descuentos d
+            JOIN productos p ON p.prodid = ?
+            WHERE d.descactivo = 1
+              AND CURDATE() BETWEEN d.descfechainicio AND d.descfechafin
+              AND (
+                  (d.descalcance = 'PRODUCTO' AND d.refid = p.prodid) OR
+                  (d.descalcance = 'CATEGORIA' AND d.refid = p.catid)
+              )
+            ORDER BY d.descporcentaje DESC
+        `, [req.params.prodid]);
+        res.json(descuentos);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// =====================================================
 // OBTENER UN DESCUENTO POR ID
 // =====================================================
 router.get('/:id', async (req, res) => {
@@ -54,6 +77,15 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Alcance debe ser PRODUCTO o CATEGORIA' });
         }
 
+        // Validate dates
+        const hoy = new Date().toISOString().split('T')[0];
+        if (descfechafin < hoy) {
+            return res.status(400).json({ error: 'La fecha de fin no puede ser una fecha pasada' });
+        }
+        if (descfechafin < descfechainicio) {
+            return res.status(400).json({ error: 'La fecha de fin debe ser posterior a la de inicio' });
+        }
+
         const [result] = await pool.query(`
             INSERT INTO descuentos (descnombre, descalcance, refid, descporcentaje, descfechainicio, descfechafin)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -75,6 +107,11 @@ router.put('/:id', async (req, res) => {
     try {
         const { descnombre, descalcance, refid, descporcentaje, descfechainicio, descfechafin, descactivo } = req.body;
 
+        // Validate dates
+        if (descfechafin && descfechainicio && descfechafin < descfechainicio) {
+            return res.status(400).json({ error: 'La fecha de fin debe ser posterior a la de inicio' });
+        }
+
         await pool.query(`
             UPDATE descuentos 
             SET descnombre = ?, descalcance = ?, refid = ?, descporcentaje = ?,
@@ -95,28 +132,6 @@ router.delete('/:id', async (req, res) => {
     try {
         await pool.query('UPDATE descuentos SET descactivo = 0 WHERE descid = ?', [req.params.id]);
         res.json({ mensaje: 'Descuento desactivado exitosamente' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// =====================================================
-// OBTENER DESCUENTOS ACTIVOS PARA UN PRODUCTO
-// =====================================================
-router.get('/producto/:prodid', async (req, res) => {
-    try {
-        const [descuentos] = await pool.query(`
-            SELECT d.* FROM descuentos d
-            JOIN productos p ON p.prodid = ?
-            WHERE d.descactivo = 1
-              AND CURDATE() BETWEEN d.descfechainicio AND d.descfechafin
-              AND (
-                  (d.descalcance = 'PRODUCTO' AND d.refid = p.prodid) OR
-                  (d.descalcance = 'CATEGORIA' AND d.refid = p.catid)
-              )
-            ORDER BY d.descporcentaje DESC
-        `, [req.params.prodid]);
-        res.json(descuentos);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

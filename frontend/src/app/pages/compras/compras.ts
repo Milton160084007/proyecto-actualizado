@@ -95,19 +95,29 @@ export class ComprasComponent implements OnInit {
     }
 
     procesarCompra() {
-        if (this.items.length === 0) {
-            alert('Agregue al menos un producto');
+        // Validar proveedor
+        if (!this.proveedorSeleccionado) {
+            alert('⚠️ Seleccione un proveedor antes de registrar la compra');
             return;
         }
 
-        // Validate all items have cost and vencimiento
+        if (this.items.length === 0) {
+            alert('⚠️ Agregue al menos un producto');
+            return;
+        }
+
+        // Validate all items have cost and quantity
         for (const item of this.items) {
+            if (!item.cantidad || item.cantidad <= 0) {
+                alert(`⚠️ Ingrese una cantidad válida para: ${item.prodnombre}`);
+                return;
+            }
             if (!item.costo_compra || item.costo_compra <= 0) {
-                alert(`Ingrese un costo válido para: ${item.prodnombre}`);
+                alert(`⚠️ Ingrese un costo válido para: ${item.prodnombre}`);
                 return;
             }
             if (!item.fecha_vencimiento) {
-                alert(`Ingrese fecha de vencimiento para: ${item.prodnombre}`);
+                alert(`⚠️ Ingrese fecha de vencimiento para: ${item.prodnombre}`);
                 return;
             }
         }
@@ -129,12 +139,12 @@ export class ComprasComponent implements OnInit {
 
         this.api.createEntrada(data).subscribe({
             next: (res) => {
-                alert(`✅ Compra registrada exitosamente!\nDocumento: ${res.documento}\nItems: ${res.items.length}`);
+                alert(`✅ Compra registrada exitosamente`);
                 this.loading = false;
                 this.volverHistorial();
             },
             error: (err) => {
-                alert('Error al registrar compra: ' + (err.error?.error || err.message));
+                alert('❌ Error al registrar compra: ' + (err.error?.error || err.message));
                 this.loading = false;
             }
         });

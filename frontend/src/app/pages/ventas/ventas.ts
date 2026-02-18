@@ -59,11 +59,12 @@ export class VentasComponent implements OnInit {
         if (confirm(`¿Anular la venta ${venta.vennumero}? Esto devolverá el stock.`)) {
             this.api.anularVenta(venta.venid, this.auth.usuario?.usuid).subscribe({
                 next: () => { alert('Venta anulada exitosamente'); this.cargarHistorial(); this.cerrarDetalle(); },
-                error: (err) => alert('Error: ' + (err.error?.error || err.message))
+                error: (err) => alert('Error al anular venta: ' + (err.error?.error || err.message))
             });
         }
     }
 
+    // ===== NUEVA VENTA =====
     iniciarNuevaVenta() {
         this.vistaActual = 'nueva';
         this.carrito = [];
@@ -71,6 +72,7 @@ export class VentasComponent implements OnInit {
         this.busquedaCliente = '';
         this.busquedaProducto = '';
         this.productosFiltrados = [];
+
         this.api.getClientes().subscribe(data => this.clientes = data);
         this.api.getProductos().subscribe(data => this.productos = data);
     }
@@ -80,25 +82,24 @@ export class VentasComponent implements OnInit {
         this.cargarHistorial();
     }
 
-    seleccionarCliente(cliente: any) {
-        this.clienteSeleccionado = cliente;
-        this.busquedaCliente = '';
-    }
-
-    get clientesFiltrados(): any[] {
+    filtrarClientes(): any[] {
         if (!this.busquedaCliente.trim()) return [];
         const term = this.busquedaCliente.toLowerCase();
         return this.clientes.filter(c =>
-            c.clinombre.toLowerCase().includes(term) || c.clicidruc.includes(term)
+            c.clinombre.toLowerCase().includes(term) || (c.clicidruc && c.clicidruc.includes(term))
         ).slice(0, 5);
+    }
+
+    seleccionarCliente(cliente: any) {
+        this.clienteSeleccionado = cliente;
+        this.busquedaCliente = '';
     }
 
     buscarProducto() {
         if (!this.busquedaProducto.trim()) { this.productosFiltrados = []; return; }
         const term = this.busquedaProducto.toLowerCase();
         this.productosFiltrados = this.productos.filter(p =>
-            (p.prodnombre.toLowerCase().includes(term) || p.prodcodigo.toLowerCase().includes(term)) &&
-            p.prodstock_global > 0
+            (p.prodnombre.toLowerCase().includes(term) || p.prodcodigo.toLowerCase().includes(term)) && p.prodstock_global > 0
         ).slice(0, 8);
     }
 
@@ -112,22 +113,42 @@ export class VentasComponent implements OnInit {
         } else {
             const precioUnit = parseFloat(producto.prodprecio_venta);
             const tieneIva = producto.prodtiene_iva;
-            const subtotal = precioUnit;
-            const iva = tieneIva ? subtotal * (this.porcentajeIva / 100) : 0;
-            this.carrito.push({
+            const item: any = {
                 prodid: producto.prodid, prodnombre: producto.prodnombre, prodcodigo: producto.prodcodigo,
                 precio_unitario: precioUnit, cantidad: 1, descuento: 0, tiene_iva: tieneIva,
-                subtotal, iva, total: subtotal + iva, stock_disponible: producto.prodstock_global
+                subtotal: 0, iva: 0, total: 0, stock_disponible: producto.prodstock_global,
+                descuento_nombre: '', descuento_pct: 0
+            };
+
+            // Auto-aplicar descuento activo
+            this.api.getDescuentosProducto(producto.prodid).subscribe({
+                next: (descuentos) => {
+                    if (descuentos && descuentos.length > 0) {
+                        const mejor = descuentos[0];
+                        item.descuento_nombre = mejor.descnombre;
+                        item.descuento_pct = parseFloat(mejor.descporcentaje);
+                        item.descuento = +(precioUnit * item.descuento_pct / 100).toFixed(2);
+                    }
+                    this.recalcularLinea(item);
+                },
+                error: () => this.recalcularLinea(item)
             });
+
+            this.recalcularLinea(item);
+            this.carrito.push(item);
         }
         this.busquedaProducto = '';
         this.productosFiltrados = [];
     }
 
     recalcularLinea(item: any) {
-        const subtotal = (item.cantidad * item.precio_unitario) - item.descuento;
+        // descuento es el valor monetario de descuento POR UNIDAD
+        const precioConDescuento = Math.max(0, item.precio_unitario - item.descuento);
+        const subtotal = precioConDescuento * item.cantidad;
         const iva = item.tiene_iva ? subtotal * (this.porcentajeIva / 100) : 0;
-        item.subtotal = subtotal; item.iva = iva; item.total = subtotal + iva;
+        item.subtotal = +subtotal.toFixed(2);
+        item.iva = +iva.toFixed(2);
+        item.total = +(subtotal + iva).toFixed(2);
     }
 
     actualizarCantidad(item: any) {
@@ -156,7 +177,7 @@ export class VentasComponent implements OnInit {
 
         this.api.createVenta(data).subscribe({
             next: (res) => {
-                alert(`✅ Venta creada exitosamente!\nFactura: ${res.factura?.numero || 'Generada'}\nTotal: $${res.factura?.total || this.totalGeneral.toFixed(2)}`);
+                alert(`✅ Venta creada exitosamente!\nTotal: $${this.totalGeneral.toFixed(2)}`);
                 this.volverHistorial();
             },
             error: (err) => alert('Error al procesar venta: ' + (err.error?.error || err.message))
@@ -177,7 +198,7 @@ export class VentasComponent implements OnInit {
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.text('Sistema de Gestión de Inventario', 14, 26);
-        doc.text('Dirección: Av. Principal s/n', 14, 31);
+        doc.text('RUC: 0000000000001', 14, 31);
 
         // Invoice number (right)
         doc.setFontSize(16);
@@ -186,7 +207,7 @@ export class VentasComponent implements OnInit {
         doc.text('FACTURA', 196, 20, { align: 'right' });
         doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
-        doc.text(`N° ${data.vennumero}`, 196, 28, { align: 'right' });
+        doc.text(`N° ${data.vennumero || 'S/N'}`, 196, 28, { align: 'right' });
 
         const fecha = new Date(data.venfecha).toLocaleDateString('es-EC', {
             year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -205,9 +226,9 @@ export class VentasComponent implements OnInit {
         doc.setFont('helvetica', 'bold');
         doc.text('Datos del Cliente', 14, 46);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Nombre: ${data.clinombre}`, 14, 53);
-        doc.text(`CI/RUC: ${data.clicidruc}`, 14, 59);
-        doc.text(`Cajero: ${data.usuusuario}`, 120, 53);
+        doc.text(`Nombre: ${data.clinombre || 'N/A'}`, 14, 53);
+        doc.text(`CI/RUC: ${data.clicidruc || 'N/A'}`, 14, 59);
+        doc.text(`Cajero: ${data.usuusuario || 'N/A'}`, 120, 53);
 
         // ANULADA stamp
         if (data.venestado === 'ANULADA') {
@@ -227,12 +248,12 @@ export class VentasComponent implements OnInit {
                 (i + 1).toString(),
                 d.prodcodigo || '-',
                 d.prodnombre,
-                (d.vdetcantidad || d.cantidad || 0).toString(),
-                `$${parseFloat(d.vdetprecio_unitario || d.precio_unitario || 0).toFixed(2)}`,
-                `$${parseFloat(d.vdetdescuento || d.descuento || 0).toFixed(2)}`,
-                `$${parseFloat(d.vdetsubtotal || d.subtotal || 0).toFixed(2)}`,
-                `$${parseFloat(d.vdetiva || d.iva || 0).toFixed(2)}`,
-                `$${parseFloat(d.vdettotal || d.total || 0).toFixed(2)}`
+                (d.dvcantidad || d.vdetcantidad || d.cantidad || 0).toString(),
+                `$${parseFloat(d.dvprecio_unitario || d.vdetprecio_unitario || d.precio_unitario || 0).toFixed(2)}`,
+                `$${parseFloat(d.dvdescuento || d.vdetdescuento || d.descuento || 0).toFixed(2)}`,
+                `$${parseFloat(d.dvsubtotal || d.vdetsubtotal || d.subtotal || 0).toFixed(2)}`,
+                `$${parseFloat(d.dviva || d.vdetiva || d.iva || 0).toFixed(2)}`,
+                `$${parseFloat(d.dvtotal || d.vdettotal || d.total || 0).toFixed(2)}`
             ]),
             theme: 'grid',
             headStyles: { fillColor: [79, 70, 229], textColor: 255, fontSize: 8, halign: 'center' as const },
@@ -282,6 +303,6 @@ export class VentasComponent implements OnInit {
         doc.text('Gracias por su compra - Micromercado Muñoz', 105, 280, { align: 'center' });
         doc.text('Este documento es una representación impresa de la factura electrónica', 105, 285, { align: 'center' });
 
-        doc.save(`Factura_${data.vennumero}.pdf`);
+        doc.save(`Factura_${data.vennumero || 'venta'}.pdf`);
     }
 }

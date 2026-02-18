@@ -72,6 +72,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/descuentos/descuentos').then(m => m.DescuentosComponent)
     },
     {
+        path: 'configuracion',
+        canActivate: [authGuard],
+        data: { modulo: 'configuracion' },
+        loadComponent: () => import('./pages/configuracion/configuracion').then(m => m.ConfiguracionComponent)
+    },
+    {
+        path: 'auditoria',
+        canActivate: [authGuard],
+        data: { modulo: 'auditoria' },
+        loadComponent: () => import('./pages/auditoria/auditoria').then(m => m.AuditoriaComponent)
+    },
+    {
         path: '**',
         redirectTo: ''
     }

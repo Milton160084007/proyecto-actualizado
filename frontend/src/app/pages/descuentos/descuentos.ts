@@ -80,32 +80,46 @@ export class DescuentosComponent implements OnInit {
 
     guardar() {
         if (!this.form.descnombre || !this.form.refid || !this.form.descporcentaje || !this.form.descfechainicio || !this.form.descfechafin) {
-            alert('Complete todos los campos obligatorios');
+            alert('⚠️ Complete todos los campos obligatorios');
+            return;
+        }
+
+        // Validate dates
+        const hoy = new Date().toISOString().split('T')[0];
+        if (this.form.descfechafin < hoy) {
+            alert('⚠️ La fecha de fin no puede ser una fecha pasada');
+            return;
+        }
+        if (this.form.descfechafin < this.form.descfechainicio) {
+            alert('⚠️ La fecha de fin debe ser posterior a la fecha de inicio');
+            return;
+        }
+        if (this.form.descporcentaje <= 0 || this.form.descporcentaje > 100) {
+            alert('⚠️ El porcentaje debe estar entre 0.01 y 100');
             return;
         }
 
         const data = { ...this.form };
 
-        if (this.editando) {
+        if (this.editando && data.descid) {
             this.api.updateDescuento(data.descid, data).subscribe({
-                next: () => { this.cargarDatos(); this.cerrarModal(); },
-                error: (err) => alert('Error: ' + (err.error?.error || err.message))
+                next: () => { alert('✅ Descuento actualizado'); this.cargarDatos(); this.cerrarModal(); },
+                error: (err) => alert('❌ Error: ' + (err.error?.error || err.message))
             });
         } else {
             this.api.createDescuento(data).subscribe({
-                next: () => { this.cargarDatos(); this.cerrarModal(); },
-                error: (err) => alert('Error: ' + (err.error?.error || err.message))
+                next: () => { alert('✅ Descuento creado'); this.cargarDatos(); this.cerrarModal(); },
+                error: (err) => alert('❌ Error: ' + (err.error?.error || err.message))
             });
         }
     }
 
     eliminar(descuento: any) {
-        if (confirm(`¿Desactivar el descuento "${descuento.descnombre}"?`)) {
-            this.api.deleteDescuento(descuento.descid).subscribe({
-                next: () => this.cargarDatos(),
-                error: (err) => alert('Error: ' + (err.error?.error || err.message))
-            });
-        }
+        if (!confirm(`⚠️ ¿Está seguro de desactivar el descuento "${descuento.descnombre}"?\n\nEsta acción desactivará la promoción.`)) return;
+        this.api.deleteDescuento(descuento.descid).subscribe({
+            next: () => { alert('✅ Descuento desactivado'); this.cargarDatos(); },
+            error: (err) => alert('❌ Error: ' + (err.error?.error || err.message))
+        });
     }
 
     estaActivo(d: any): boolean {

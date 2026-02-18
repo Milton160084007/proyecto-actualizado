@@ -1,0 +1,43 @@
+<div class="container fade-in">
+    <div class="page-header">
+        <h1>📝 Log de Auditoría</h1>
+        <p>Registro de todas las acciones del sistema</p>
+    </div>
+
+    <div class="card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Tabla</th>
+                        <th>ID Registro</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of logs">
+                        <td><small>{{ log.audfecha | date:'dd/MM/yyyy HH:mm:ss' }}</small></td>
+                        <td>{{ log.usuusuario || 'Sistema' }}</td>
+                        <td><span class="badge" [ngClass]="getBadge(log.audaccion)">{{ log.audaccion }}</span></td>
+                        <td>{{ log.audtabla }}</td>
+                        <td>{{ log.audregistro_id }}</td>
+                        <td><small>{{ log.auddetalle }}</small></td>
+                    </tr>
+                    <tr *ngIf="logs.length === 0 && !loading">
+                        <td colspan="6" class="text-center p-3">No hay registros de auditoría</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" *ngIf="total > limit">
+            <button class="btn btn-sm btn-secondary" (click)="anterior()" [disabled]="pagina === 0">← Anterior</button>
+            <span class="pag-info">Página {{ pagina + 1 }} de {{ (total / limit | number:'1.0-0') }}</span>
+            <button class="btn btn-sm btn-secondary" (click)="siguiente()"
+                [disabled]="(pagina + 1) * limit >= total">Siguiente →</button>
+        </div>
+    </div>
+</div>

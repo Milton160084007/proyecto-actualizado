@@ -84,8 +84,8 @@
                         <div *ngIf="!clienteSeleccionado" class="search-container">
                             <input type="text" class="form-control" placeholder="Buscar cliente por nombre o CI/RUC..."
                                 [(ngModel)]="busquedaCliente">
-                            <div class="search-results" *ngIf="clientesFiltrados.length > 0">
-                                <div *ngFor="let c of clientesFiltrados" class="result-item"
+                            <div class="search-results" *ngIf="filtrarClientes().length > 0">
+                                <div *ngFor="let c of filtrarClientes()" class="result-item"
                                     (click)="seleccionarCliente(c)">
                                     <strong>{{ c.clinombre }}</strong>
                                     <small>{{ c.clicidruc }}</small>
@@ -146,6 +146,10 @@
                                     <label>Desc:</label>
                                     <input type="number" min="0" step="0.01" [(ngModel)]="item.descuento"
                                         (change)="recalcularLinea(item)">
+                                    <small *ngIf="item.descuento_nombre" class="badge badge-success"
+                                        style="font-size:0.65rem; margin-top: 2px;">
+                                        🏷️ {{ item.descuento_nombre }} (-{{ item.descuento_pct }}%)
+                                    </small>
                                 </div>
                                 <div class="campo total">
                                     <strong>$ {{ item.total | number:'1.2-2' }}</strong>

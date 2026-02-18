@@ -37,6 +37,9 @@ app.use('/api/movimientos', movimientosRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/reportes', require('./routes/reportes'));
 app.use('/api/descuentos', require('./routes/descuentos'));
+app.use('/api/configuracion', require('./routes/configuracion')(pool));
+app.use('/api/auditoria', require('./routes/auditoria')(pool));
+app.use('/api/devoluciones', require('./routes/devoluciones')(pool));
 
 // =====================================================
 // RUTA: Health Check
