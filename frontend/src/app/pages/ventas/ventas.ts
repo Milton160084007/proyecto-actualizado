@@ -148,15 +148,22 @@ export class VentasComponent implements OnInit {
     }
 
     recalcularLinea(item: any) {
-        if (item.descuento_pct_input !== undefined && item.descuento_pct_input !== null) {
-            if (item.descuento_pct_input < 0) item.descuento_pct_input = 0;
-            if (item.descuento_pct_input > 100) item.descuento_pct_input = 100;
-            item.descuento = +(item.precio_unitario * (item.descuento_pct_input / 100)).toFixed(2);
-        }
+        // Aseguramos que tome el valor tal cual lo escribe el usuario (ej: 10 para 10%)
+        let porcentaje = parseFloat(item.descuento_pct_input);
 
+        if (isNaN(porcentaje) || porcentaje < 0) porcentaje = 0;
+        if (porcentaje > 100) porcentaje = 100;
+
+        item.descuento_pct_input = porcentaje; // Mantenemos el número visible
+
+        // Calculamos el dinero a descontar en base al porcentaje
+        item.descuento = +(item.precio_unitario * (porcentaje / 100)).toFixed(2);
+
+        // Subtotal, IVA y Total
         const precioConDescuento = Math.max(0, item.precio_unitario - item.descuento);
         const subtotal = precioConDescuento * item.cantidad;
         const iva = item.tiene_iva ? subtotal * (this.porcentajeIva / 100) : 0;
+
         item.subtotal = +subtotal.toFixed(2);
         item.iva = +iva.toFixed(2);
         item.total = +(subtotal + iva).toFixed(2);

@@ -32,8 +32,16 @@ export class ConfiguracionComponent implements OnInit {
         this.guardando = true;
         this.mensaje = '';
         this.api.updateConfiguracion(this.config).subscribe({
-            next: () => { this.mensaje = '✅ Configuración guardada exitosamente'; this.guardando = false; },
-            error: (err) => { this.mensaje = '❌ Error: ' + (err.error?.error || err.message); this.guardando = false; }
+            next: () => {
+                this.mensaje = '✅ Configuración guardada exitosamente. Recargando sistema...';
+                this.guardando = false;
+                // Recargamos para que el IVA nuevo se aplique a Ventas y Compras
+                setTimeout(() => window.location.reload(), 1500);
+            },
+            error: (err) => {
+                this.mensaje = '❌ Error: ' + (err.error?.error || err.message);
+                this.guardando = false;
+            }
         });
     }
 }

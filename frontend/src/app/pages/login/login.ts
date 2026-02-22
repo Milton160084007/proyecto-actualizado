@@ -39,8 +39,10 @@ export class Login {
                 this.router.navigate(['/']);
             },
             error: (err) => {
+                // AQUÍ ESTABA EL ERROR: Forzamos a que loading sea false pase lo que pase
                 this.loading = false;
-                this.error = err.error?.error || 'Usuario o contraseña incorrectos';
+                this.error = err.error?.error || 'Usuario o contraseña incorrectos. Verifica tus datos.';
+                this.contrasena = ''; // Limpiamos la clave por seguridad
             }
         });
     }

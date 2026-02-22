@@ -76,22 +76,24 @@ export class ComprasComponent implements OnInit {
             return;
         }
 
-        // Obtener detalle del producto para listar los proveedores asigandos
         this.api.getProducto(producto.prodid).subscribe(detalle => {
+            // VALIDACIÓN: No dejar comprar si no tiene proveedor asignado
             if (!detalle.proveedores || detalle.proveedores.length === 0) {
-                alert(`⚠️ El producto "${producto.prodnombre}" no tiene ningún proveedor asignado. Asígnele al menos uno en el apartado de Productos.`);
+                alert(`⚠️ ERROR: El producto "${producto.prodnombre}" NO tiene ningún proveedor asignado.\n\nPor favor, asigne un proveedor en el módulo de Productos antes de comprar.`);
                 return;
             }
+
             this.items.push({
                 prodid: producto.prodid,
                 prodnombre: producto.prodnombre,
                 prodcodigo: producto.prodcodigo,
                 cantidad: 1,
-                costo_compra: detalle.proveedores?.length > 0 ? detalle.proveedores[0].costo_referencia : 0,
+                // Carga directo el costo referencial del primer proveedor
+                costo_compra: detalle.proveedores[0].costo_referencia || 0,
                 nro_lote: '',
                 fecha_vencimiento: '',
-                provid: detalle.proveedores?.length > 0 ? detalle.proveedores[0].provid : null,
-                proveedoresDisponibles: detalle.proveedores || []
+                provid: detalle.proveedores[0].provid,
+                proveedoresDisponibles: detalle.proveedores
             });
         });
 
@@ -116,27 +118,25 @@ export class ComprasComponent implements OnInit {
     }
 
     procesarCompra() {
-        if (this.items.length === 0) {
-            alert('⚠️ Agregue al menos un producto');
-            return;
-        }
+        if (this.items.length === 0) { alert('⚠️ Agregue al menos un producto'); return; }
 
         const hoy = new Date().toISOString().split('T')[0];
+
         for (const item of this.items) {
             if (!item.nro_lote || item.nro_lote.trim() === '') {
-                alert(`⚠️ Ingrese el número de lote para: ${item.prodnombre}`);
+                alert(`⚠️ OBLIGATORIO: Ingrese el número de lote para: ${item.prodnombre}`);
                 return;
             }
             if (!item.fecha_vencimiento) {
-                alert(`⚠️ Ingrese la fecha de vencimiento para: ${item.prodnombre}`);
+                alert(`⚠️ OBLIGATORIO: Ingrese la fecha de vencimiento para: ${item.prodnombre}`);
                 return;
             }
             if (item.fecha_vencimiento <= hoy) {
-                alert(`⚠️ La fecha de vencimiento de ${item.prodnombre} no puede estar caducada o vencer hoy.`);
+                alert(`❌ ERROR: La fecha de vencimiento de "${item.prodnombre}" indica que el lote ya está CADUCADO o vence hoy. No se puede ingresar.`);
                 return;
             }
             if (item.costo_compra <= 0) {
-                alert(`⚠️ Ingrese un costo de compra válido para: ${item.prodnombre}`);
+                alert(`⚠️ Ingrese un costo de compra válido mayor a $0 para: ${item.prodnombre}`);
                 return;
             }
         }

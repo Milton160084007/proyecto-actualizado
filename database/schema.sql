@@ -222,3 +222,43 @@ INSERT INTO categorias (catnombre) VALUES ('Bebidas'), ('Snacks'), ('Lacteos');
 
 -- Cliente genérico para ventas sin factura
 INSERT INTO clientes (clinombre, clicidruc) VALUES ('Consumidor Final', '9999999999999');
+
+-- --------------------------------------------------------
+-- TRIGGERS ADICIONALES DE AUDITORÍA
+-- --------------------------------------------------------
+
+DELIMITER $$
+
+-- Auditoría: Creación de Usuarios
+DROP TRIGGER IF EXISTS trg_audit_usuarios_insert$$
+CREATE TRIGGER trg_audit_usuarios_insert
+AFTER INSERT ON usuarios
+FOR EACH ROW
+BEGIN
+    INSERT INTO auditoria (usuid, audaccion, audtabla, audregistro_id, auddetalle)
+    VALUES (1, 'CREATE', 'usuarios', NEW.usuid, CONCAT('Nuevo usuario registrado: ', NEW.usuusuario));
+END$$
+
+-- Auditoría: Actualización de Clientes
+DROP TRIGGER IF EXISTS trg_audit_clientes_update$$
+CREATE TRIGGER trg_audit_clientes_update
+AFTER UPDATE ON clientes
+FOR EACH ROW
+BEGIN
+    INSERT INTO auditoria (usuid, audaccion, audtabla, audregistro_id, auddetalle)
+    VALUES (1, 'UPDATE', 'clientes', NEW.cliid, CONCAT('Datos actualizados del cliente: ', NEW.clinombre));
+END$$
+
+-- Auditoría: Pérdidas/Desechos en Kardex
+DROP TRIGGER IF EXISTS trg_audit_kardex_perdida$$
+CREATE TRIGGER trg_audit_kardex_perdida
+AFTER INSERT ON kardex
+FOR EACH ROW
+BEGIN
+    IF NEW.kartipo = 'PERDIDA_DESECHO' OR NEW.kartipo = 'AJUSTE_SALIDA' THEN
+        INSERT INTO auditoria (usuid, audaccion, audtabla, audregistro_id, auddetalle)
+        VALUES (NEW.usuid, 'DELETE', 'kardex', NEW.karid, CONCAT('Pérdida/Desecho registrado, cantidad: ', NEW.karcantidad));
+    END IF;
+END$$
+
+DELIMITER ;

@@ -52,14 +52,16 @@ export class AuthService {
         this.router.navigate(['/login']);
     }
 
-    // Permisos por rol
+    // Permisos por rol estandarizados
     tieneAcceso(modulo: string): boolean {
         if (!this.usuario) return false;
         const rol = this.usuario.rolnombre;
 
         const permisos: Record<string, string[]> = {
             'Administrador': ['dashboard', 'productos', 'categorias', 'movimientos', 'proveedores', 'clientes', 'ventas', 'usuarios', 'reportes', 'compras', 'descuentos', 'configuracion', 'auditoria'],
-            'Cajero': ['dashboard', 'ventas', 'movimientos', 'clientes', 'productos'],
+            // Cajero: SOLO Ventas y Clientes (NO Compras, NO Proveedores, NO Movimientos de bodega)
+            'Cajero': ['dashboard', 'ventas', 'clientes'],
+            // Bodeguero: SOLO Compras, Inventario, Proveedores (NO Ventas, NO Clientes, NO Reportes financieros)
             'Bodeguero': ['dashboard', 'productos', 'movimientos', 'categorias', 'proveedores', 'compras']
         };
 
