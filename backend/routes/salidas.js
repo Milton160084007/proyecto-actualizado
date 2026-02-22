@@ -94,32 +94,10 @@ router.post('/', async (req, res) => {
             }
 
             const precioUnitario = parseFloat(producto.prodprecio_venta);
-            const descuento = item.descuento || 0;
-            const subtotalLinea = redondear((item.cantidad * precioUnitario) - descuento);
-
-            let impuestoLinea = 0;
-            if (producto.prodtiene_iva) {
-                impuestoLinea = redondear(subtotalLinea * (porcentaje_iva / 100));
-                baseImponible += subtotalLinea;
-            } else {
-                baseCero += subtotalLinea;
-            }
-
-            const totalLinea = redondear(subtotalLinea + impuestoLinea);
-
-            detallesInsertados.push({
-                prodid: item.prodid,
-                prodnombre: producto.prodnombre,
-                cantidad: item.cantidad,
-                precio_unitario: precioUnitario,
-                descuento: descuento,
-                subtotal: subtotalLinea,
-                impuesto: impuestoLinea,
-                total: totalLinea
-            });
+            const descUnitario = item.descuento || 0;
+            let cantPendiente = item.cantidad;
 
             // ---- FIFO: descontar de lotes ----
-            let cantPendiente = item.cantidad;
             while (cantPendiente > 0) {
                 const [lotes] = await connection.query(`
                     SELECT lotid, lotcantidad_actual FROM lotes 
@@ -128,21 +106,46 @@ router.post('/', async (req, res) => {
                     LIMIT 1
                 `, [item.prodid]);
 
-                if (lotes.length === 0) {
-                    // No quedan lotes pero el stock global dice que hay. Descontar directo.
-                    break;
+                let lotidUsado = null;
+                let cantDescontada = cantPendiente;
+
+                if (lotes.length > 0) {
+                    const lote = lotes[0];
+                    lotidUsado = lote.lotid;
+                    cantDescontada = Math.min(cantPendiente, lote.lotcantidad_actual);
+                    const nuevaCantidad = lote.lotcantidad_actual - cantDescontada;
+
+                    await connection.query(`
+                        UPDATE lotes SET lotcantidad_actual = ?, lotactivo = IF(? = 0, 0, 1) 
+                        WHERE lotid = ?
+                    `, [nuevaCantidad, nuevaCantidad, lote.lotid]);
                 }
 
-                const lote = lotes[0];
-                const descontar = Math.min(cantPendiente, lote.lotcantidad_actual);
-                const nuevaCantidad = lote.lotcantidad_actual - descontar;
+                const subtotalLinea = redondear(cantDescontada * (precioUnitario - descUnitario));
+                let impuestoLinea = 0;
+                if (producto.prodtiene_iva) {
+                    impuestoLinea = redondear(subtotalLinea * (porcentaje_iva / 100));
+                    baseImponible += subtotalLinea;
+                } else {
+                    baseCero += subtotalLinea;
+                }
 
-                await connection.query(`
-                    UPDATE lotes SET lotcantidad_actual = ?, lotactivo = IF(? = 0, 0, 1) 
-                    WHERE lotid = ?
-                `, [nuevaCantidad, nuevaCantidad, lote.lotid]);
+                const totalLinea = redondear(subtotalLinea + impuestoLinea);
 
-                cantPendiente -= descontar;
+                detallesInsertados.push({
+                    prodid: item.prodid,
+                    lotid: lotidUsado,
+                    prodnombre: producto.prodnombre,
+                    cantidad: cantDescontada,
+                    precio_unitario: precioUnitario,
+                    descuento: descUnitario * cantDescontada,
+                    subtotal: subtotalLinea,
+                    impuesto: impuestoLinea,
+                    total: totalLinea
+                });
+
+                cantPendiente -= cantDescontada;
+                if (lotes.length === 0) break; // Si ya no hay lotes, la cantidad restante se vendió sin lote
             }
 
             // ---- Registrar en Kardex (el trigger actualiza prodstock_global) ----
@@ -177,10 +180,10 @@ router.post('/', async (req, res) => {
         for (const det of detallesInsertados) {
             await connection.query(`
                 INSERT INTO ventas_detalle 
-                (venid, prodid, vdetcantidad, vdetprecio_unitario, vdetdescuento, 
+                (venid, prodid, lotid, vdetcantidad, vdetprecio_unitario, vdetdescuento, 
                  vdetsubtotal, vdetimpuesto, vdettotal)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `, [venid, det.prodid, det.cantidad, det.precio_unitario,
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [venid, det.prodid, det.lotid, det.cantidad, det.precio_unitario,
                 det.descuento, det.subtotal, det.impuesto, det.total]);
         }
 
@@ -240,6 +243,14 @@ router.put('/:id/anular', async (req, res) => {
 
             const saldoAnterior = prod[0].prodstock_global;
             const saldoNuevo = saldoAnterior + det.vdetcantidad;
+
+            // Restablecer cantidad en el lote
+            if (det.lotid) {
+                await connection.query(`
+                    UPDATE lotes SET lotcantidad_actual = lotcantidad_actual + ?, lotactivo = 1 
+                    WHERE lotid = ?
+                `, [det.vdetcantidad, det.lotid]);
+            }
 
             await connection.query(`
                 INSERT INTO kardex (prodid, kartipo, karcantidad, karsaldo_anterior,

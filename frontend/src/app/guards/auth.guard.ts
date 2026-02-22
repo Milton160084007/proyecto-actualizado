@@ -14,6 +14,7 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     // Check role-based permissions if route has data.modulo
     const modulo = route.data?.['modulo'];
     if (modulo && !auth.tieneAcceso(modulo)) {
+        alert('❌ Acceso denegado: No tienes permisos para acceder al módulo de ' + modulo);
         router.navigate(['/']);
         return false;
     }

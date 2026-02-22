@@ -7,9 +7,9 @@ module.exports = function (pool) {
     router.get('/', async (req, res) => {
         try {
             const [rows] = await pool.query(
-                `SELECT d.*, v.vennumero, c.clinombre
+                `SELECT d.*, v.vennumero_factura as vennumero, c.clinombre
                  FROM devoluciones d
-                 LEFT JOIN ventas v ON d.venid = v.venid
+                 LEFT JOIN ventas_encabezado v ON d.venid = v.venid
                  LEFT JOIN clientes c ON v.cliid = c.cliid
                  ORDER BY d.devfecha DESC`
             );
@@ -32,10 +32,10 @@ module.exports = function (pool) {
             for (const item of detalles) {
                 // Get original price
                 const [detVenta] = await conn.query(
-                    `SELECT dv.dvprecio_unitario FROM detalle_venta dv WHERE dv.venid=? AND dv.prodid=? LIMIT 1`,
+                    `SELECT dv.vdetprecio_unitario FROM ventas_detalle dv WHERE dv.venid=? AND dv.prodid=? LIMIT 1`,
                     [venid, item.prodid]
                 );
-                const precioUnit = detVenta.length > 0 ? parseFloat(detVenta[0].dvprecio_unitario) : 0;
+                const precioUnit = detVenta.length > 0 ? parseFloat(detVenta[0].vdetprecio_unitario) : 0;
                 totalDevuelto += precioUnit * item.cantidad;
 
                 // Return stock
@@ -78,7 +78,7 @@ module.exports = function (pool) {
                 `SELECT cliid, clinombre, clicidruc, 'cliente' as tipo FROM clientes WHERE clinombre LIKE ? OR clicidruc LIKE ? LIMIT 5`, [q, q]
             );
             const [ventas] = await pool.query(
-                `SELECT venid, vennumero, ventotal, 'venta' as tipo FROM ventas WHERE vennumero LIKE ? LIMIT 5`, [q]
+                `SELECT venid, vennumero_factura as vennumero, ventotal, 'venta' as tipo FROM ventas_encabezado WHERE vennumero_factura LIKE ? LIMIT 5`, [q]
             );
             res.json({ productos, clientes, ventas });
         } catch (err) {

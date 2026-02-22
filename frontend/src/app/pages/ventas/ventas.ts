@@ -32,6 +32,11 @@ export class VentasComponent implements OnInit {
 
     ngOnInit() {
         this.cargarHistorial();
+        this.api.getConfiguracion().subscribe(data => {
+            if (data && data.confiva_porcentaje) {
+                this.porcentajeIva = parseFloat(data.confiva_porcentaje);
+            }
+        });
     }
 
     cargarHistorial() {
@@ -117,7 +122,7 @@ export class VentasComponent implements OnInit {
                 prodid: producto.prodid, prodnombre: producto.prodnombre, prodcodigo: producto.prodcodigo,
                 precio_unitario: precioUnit, cantidad: 1, descuento: 0, tiene_iva: tieneIva,
                 subtotal: 0, iva: 0, total: 0, stock_disponible: producto.prodstock_global,
-                descuento_nombre: '', descuento_pct: 0
+                descuento_nombre: '', descuento_pct: 0, descuento_pct_input: 0
             };
 
             // Auto-aplicar descuento activo
@@ -127,6 +132,7 @@ export class VentasComponent implements OnInit {
                         const mejor = descuentos[0];
                         item.descuento_nombre = mejor.descnombre;
                         item.descuento_pct = parseFloat(mejor.descporcentaje);
+                        item.descuento_pct_input = item.descuento_pct;
                         item.descuento = +(precioUnit * item.descuento_pct / 100).toFixed(2);
                     }
                     this.recalcularLinea(item);
@@ -142,7 +148,12 @@ export class VentasComponent implements OnInit {
     }
 
     recalcularLinea(item: any) {
-        // descuento es el valor monetario de descuento POR UNIDAD
+        if (item.descuento_pct_input !== undefined && item.descuento_pct_input !== null) {
+            if (item.descuento_pct_input < 0) item.descuento_pct_input = 0;
+            if (item.descuento_pct_input > 100) item.descuento_pct_input = 100;
+            item.descuento = +(item.precio_unitario * (item.descuento_pct_input / 100)).toFixed(2);
+        }
+
         const precioConDescuento = Math.max(0, item.precio_unitario - item.descuento);
         const subtotal = precioConDescuento * item.cantidad;
         const iva = item.tiene_iva ? subtotal * (this.porcentajeIva / 100) : 0;
@@ -284,7 +295,7 @@ export class VentasComponent implements OnInit {
         doc.setFont('helvetica', 'normal');
         doc.text('Subtotal:', boxX + 4, finalY + 13);
         doc.text(`$${subtotal}`, 192, finalY + 13, { align: 'right' });
-        doc.text('IVA (15%):', boxX + 4, finalY + 20);
+        doc.text(`IVA (${this.porcentajeIva}%):`, boxX + 4, finalY + 20);
         doc.text(`$${iva}`, 192, finalY + 20, { align: 'right' });
 
         doc.setLineWidth(0.3);

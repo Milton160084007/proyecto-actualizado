@@ -51,6 +51,8 @@
                                 <button class="btn btn-sm btn-secondary" (click)="abrirModal(p)">Editar</button>
                                 <button class="btn btn-sm btn-info" (click)="abrirModalProveedores(p)"
                                     title="Proveedores">🚚</button>
+                                <button class="btn btn-sm btn-success" (click)="abrirModalLotes(p)"
+                                    title="Lotes">📦</button>
                                 <button class="btn btn-sm btn-warning" (click)="abrirKardex(p)"
                                     title="Kardex">📊</button>
                                 <button class="btn btn-sm btn-danger" (click)="eliminar(p)">X</button>
@@ -231,6 +233,47 @@
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="cerrarKardex()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL LOTES ===== -->
+    <div class="modal-backdrop" *ngIf="modalLotesOpen" (click)="cerrarModalLotes()">
+        <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>📦 Lotes Activos — {{ productoLotes?.prodnombre }}</h3>
+                <button class="modal-close" (click)="cerrarModalLotes()">&times;</button>
+            </div>
+
+            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nro. Lote</th>
+                            <th>F. Vencimiento</th>
+                            <th>Cant. Inicial</th>
+                            <th>Cant. Actual</th>
+                            <th>Costo Compra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let l of lotesData">
+                            <td><strong>{{ l.lotnro_lote || 'S/N' }}</strong></td>
+                            <td>{{ l.lotfecha_vencimiento | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ l.lotcantidad_inicial }}</td>
+                            <td><span class="badge badge-success">{{ l.lotcantidad_actual }}</span></td>
+                            <td>$ {{ l.lotcosto_compra | number:'1.2-2' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="lotesData.length === 0" class="empty-state">
+                    No hay lotes activos para este producto
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="cerrarModalLotes()">Cerrar</button>
             </div>
         </div>
     </div>

@@ -103,47 +103,7 @@
     <header class="top-header">
       <button class="header-toggle" (click)="toggleMenu()">☰</button>
 
-      <!-- Search Bar -->
-      <div class="search-wrapper">
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Buscar productos, clientes, ventas..." [(ngModel)]="searchQuery"
-            (input)="buscar()" (focus)="searchOpen = true">
-        </div>
-        <div class="search-dropdown" *ngIf="searchOpen && searchQuery.trim()">
-          <div *ngIf="searchLoading" class="search-loading">Buscando...</div>
 
-          <div *ngIf="searchResults.productos?.length > 0" class="search-group">
-            <div class="search-group-title">📦 Productos</div>
-            <div *ngFor="let p of searchResults.productos" class="search-item" (click)="irA('producto', p.prodid)">
-              <span>{{ p.prodnombre }}</span>
-              <small>{{ p.prodcodigo }}</small>
-            </div>
-          </div>
-
-          <div *ngIf="searchResults.clientes?.length > 0" class="search-group">
-            <div class="search-group-title">🧑‍💼 Clientes</div>
-            <div *ngFor="let c of searchResults.clientes" class="search-item" (click)="irA('cliente', c.cliid)">
-              <span>{{ c.clinombre }}</span>
-              <small>{{ c.clicidruc }}</small>
-            </div>
-          </div>
-
-          <div *ngIf="searchResults.ventas?.length > 0" class="search-group">
-            <div class="search-group-title">🧾 Ventas</div>
-            <div *ngFor="let v of searchResults.ventas" class="search-item" (click)="irA('venta', v.venid)">
-              <span>{{ v.vennumero }}</span>
-              <small>${{ v.ventotal }}</small>
-            </div>
-          </div>
-
-          <div
-            *ngIf="!searchLoading && searchResults.productos?.length === 0 && searchResults.clientes?.length === 0 && searchResults.ventas?.length === 0"
-            class="search-empty">
-            Sin resultados para "{{ searchQuery }}"
-          </div>
-        </div>
-      </div>
 
       <div class="header-user">
         <!-- Dark Mode Toggle -->

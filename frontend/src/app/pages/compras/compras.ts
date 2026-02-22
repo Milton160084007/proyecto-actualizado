@@ -17,19 +17,23 @@ export class ComprasComponent implements OnInit {
     loading = false;
 
     // Nueva compra
-    proveedores: any[] = [];
     productos: any[] = [];
-    proveedorSeleccionado: any = null;
     busquedaProducto = '';
     productosFiltrados: any[] = [];
 
     items: any[] = [];
     observacion = '';
+    porcentajeIva = 15;
 
     constructor(private api: ApiService, private auth: AuthService) { }
 
     ngOnInit() {
         this.cargarHistorial();
+        this.api.getConfiguracion().subscribe(data => {
+            if (data && data.confiva_porcentaje) {
+                this.porcentajeIva = parseFloat(data.confiva_porcentaje);
+            }
+        });
     }
 
     // ===== HISTORIAL =====
@@ -45,12 +49,10 @@ export class ComprasComponent implements OnInit {
     iniciarNuevaCompra() {
         this.vistaActual = 'nueva';
         this.items = [];
-        this.proveedorSeleccionado = null;
         this.observacion = '';
         this.busquedaProducto = '';
         this.productosFiltrados = [];
 
-        this.api.getProveedores().subscribe(data => this.proveedores = data);
         this.api.getProductos().subscribe(data => this.productos = data);
     }
 
@@ -73,15 +75,26 @@ export class ComprasComponent implements OnInit {
             existente.cantidad++;
             return;
         }
-        this.items.push({
-            prodid: producto.prodid,
-            prodnombre: producto.prodnombre,
-            prodcodigo: producto.prodcodigo,
-            cantidad: 1,
-            costo_compra: 0,
-            nro_lote: '',
-            fecha_vencimiento: ''
+
+        // Obtener detalle del producto para listar los proveedores asigandos
+        this.api.getProducto(producto.prodid).subscribe(detalle => {
+            if (!detalle.proveedores || detalle.proveedores.length === 0) {
+                alert(`⚠️ El producto "${producto.prodnombre}" no tiene ningún proveedor asignado. Asígnele al menos uno en el apartado de Productos.`);
+                return;
+            }
+            this.items.push({
+                prodid: producto.prodid,
+                prodnombre: producto.prodnombre,
+                prodcodigo: producto.prodcodigo,
+                cantidad: 1,
+                costo_compra: detalle.proveedores?.length > 0 ? detalle.proveedores[0].costo_referencia : 0,
+                nro_lote: '',
+                fecha_vencimiento: '',
+                provid: detalle.proveedores?.length > 0 ? detalle.proveedores[0].provid : null,
+                proveedoresDisponibles: detalle.proveedores || []
+            });
         });
+
         this.busquedaProducto = '';
         this.productosFiltrados = [];
     }
@@ -90,20 +103,42 @@ export class ComprasComponent implements OnInit {
         this.items.splice(index, 1);
     }
 
-    get totalCompra(): number {
+    get subtotalCompra(): number {
         return this.items.reduce((sum, item) => sum + (item.cantidad * item.costo_compra), 0);
     }
 
-    procesarCompra() {
-        // Validar proveedor
-        if (!this.proveedorSeleccionado) {
-            alert('⚠️ Seleccione un proveedor antes de registrar la compra');
-            return;
-        }
+    get ivaCompra(): number {
+        return this.subtotalCompra * (this.porcentajeIva / 100);
+    }
 
+    get totalCompra(): number {
+        return this.subtotalCompra + this.ivaCompra;
+    }
+
+    procesarCompra() {
         if (this.items.length === 0) {
             alert('⚠️ Agregue al menos un producto');
             return;
+        }
+
+        const hoy = new Date().toISOString().split('T')[0];
+        for (const item of this.items) {
+            if (!item.nro_lote || item.nro_lote.trim() === '') {
+                alert(`⚠️ Ingrese el número de lote para: ${item.prodnombre}`);
+                return;
+            }
+            if (!item.fecha_vencimiento) {
+                alert(`⚠️ Ingrese la fecha de vencimiento para: ${item.prodnombre}`);
+                return;
+            }
+            if (item.fecha_vencimiento <= hoy) {
+                alert(`⚠️ La fecha de vencimiento de ${item.prodnombre} no puede estar caducada o vencer hoy.`);
+                return;
+            }
+            if (item.costo_compra <= 0) {
+                alert(`⚠️ Ingrese un costo de compra válido para: ${item.prodnombre}`);
+                return;
+            }
         }
 
         // Validate all items have cost and quantity
@@ -131,7 +166,8 @@ export class ComprasComponent implements OnInit {
                 cantidad: item.cantidad,
                 costo_compra: item.costo_compra,
                 nro_lote: item.nro_lote || null,
-                fecha_vencimiento: item.fecha_vencimiento
+                fecha_vencimiento: item.fecha_vencimiento,
+                provid: item.provid || null
             })),
             observacion: this.observacion,
             usuid: this.auth.usuario?.usuid || 1

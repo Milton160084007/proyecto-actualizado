@@ -231,7 +231,7 @@ export class Productos implements OnInit {
         this.kardexData = [];
         this.modalKardexOpen = true;
         this.api.getMovimientosKardex(producto.prodid).subscribe({
-            next: (data) => { this.kardexData = data; this.cd.detectChanges(); },
+            next: (data) => { this.kardexData = data.movimientos; this.cd.detectChanges(); },
             error: (err) => console.error('Error cargando kardex', err)
         });
     }
@@ -248,6 +248,26 @@ export class Productos implements OnInit {
             'DEVOLUCION': 'badge-secondary', 'CADUCIDAD': 'badge-danger'
         };
         return map[tipo] || 'badge-info';
+    }
+
+    // ===== MODAL LOTES =====
+    modalLotesOpen = false;
+    productoLotes: any = null;
+    lotesData: any[] = [];
+
+    abrirModalLotes(producto: any) {
+        this.productoLotes = producto;
+        this.lotesData = [];
+        this.modalLotesOpen = true;
+        this.api.getLotes(producto.prodid).subscribe({
+            next: (data) => { this.lotesData = data; this.cd.detectChanges(); },
+            error: (err) => console.error('Error cargando lotes', err)
+        });
+    }
+
+    cerrarModalLotes() {
+        this.modalLotesOpen = false;
+        this.productoLotes = null;
     }
 }
 

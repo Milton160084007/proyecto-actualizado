@@ -15,15 +15,14 @@ export class Movimientos implements OnInit {
     productos: any[] = [];
 
     modalOpen = false;
-    tipoMovimiento: 'ENTRADA' | 'SALIDA' = 'ENTRADA';
-
-    movimientoActual = {
-        producto_id: null as number | null,
+    tipoMovimiento: 'ENTRADA' | 'SALIDA' | 'PERDIDA' = 'ENTRADA';
+    movimientoActual: any = {
+        producto_id: null,
         cantidad: 1,
-        costo_compra: 0,
+        observacion: '',
         nro_lote: '',
-        fecha_vencimiento: null as string | null,
-        observacion: ''
+        fecha_vencimiento: '',
+        costo_compra: 0
     };
 
     productoSeleccionado: any = null;
@@ -62,18 +61,18 @@ export class Movimientos implements OnInit {
         });
     }
 
-    abrirModal(tipo: 'ENTRADA' | 'SALIDA') {
+    abrirModal(tipo: 'ENTRADA' | 'SALIDA' | 'PERDIDA') {
         this.tipoMovimiento = tipo;
+        this.resultado = null;
         this.movimientoActual = {
             producto_id: null,
             cantidad: 1,
-            costo_compra: 0,
+            observacion: '',
             nro_lote: '',
-            fecha_vencimiento: null,
-            observacion: ''
+            fecha_vencimiento: '',
+            costo_compra: 0
         };
         this.productoSeleccionado = null;
-        this.resultado = null;
         this.modalOpen = true;
     }
 
@@ -98,9 +97,27 @@ export class Movimientos implements OnInit {
             return;
         }
 
-        this.loading = true;
+        const hoy = new Date().toISOString().split('T')[0];
 
         if (this.tipoMovimiento === 'ENTRADA') {
+            if (!this.movimientoActual.nro_lote || this.movimientoActual.nro_lote.trim() === '') {
+                alert('⚠️ Ingrese el número de lote');
+                return;
+            }
+            if (!this.movimientoActual.fecha_vencimiento) {
+                alert('⚠️ Ingrese la fecha de vencimiento');
+                return;
+            }
+            if (this.movimientoActual.fecha_vencimiento <= hoy) {
+                alert('⚠️ La fecha de vencimiento no puede estar caducada o vencer hoy.');
+                return;
+            }
+            if (this.movimientoActual.costo_compra <= 0) {
+                alert('⚠️ Ingrese un costo de compra válido');
+                return;
+            }
+
+            this.loading = true;
             // Registrar compra vía /api/entradas
             const data = {
                 productos: [{
@@ -125,17 +142,16 @@ export class Movimientos implements OnInit {
                 }
             });
         } else {
-            // Registrar venta vía /api/ventas
+            // Registrar salida manual o pérdida vía ajuste
+            const isPerdida = this.tipoMovimiento === 'PERDIDA';
             const data = {
-                cliid: 1, // Consumidor final por defecto
-                porcentaje_iva: 15,
-                detalles: [{
-                    prodid: this.movimientoActual.producto_id,
-                    cantidad: this.movimientoActual.cantidad
-                }]
+                prodid: this.movimientoActual.producto_id,
+                cantidad_real: this.productoSeleccionado.prodstock_global - this.movimientoActual.cantidad,
+                observacion: this.movimientoActual.observacion || (isPerdida ? 'Pérdida / Desecho' : 'Venta Manual / Salida'),
+                tipo_especifico: isPerdida ? 'PERDIDA_DESECHO' : 'VENTA'
             };
 
-            this.api.createVenta(data).subscribe({
+            this.api.registrarAjuste(data).subscribe({
                 next: (res: any) => {
                     this.resultado = res;
                     this.loading = false;
@@ -166,13 +182,14 @@ export class Movimientos implements OnInit {
     }
 
     getTipoBadgeClass(tipo: string): string {
-        const classes: Record<string, string> = {
+        const map: Record<string, string> = {
             'COMPRA': 'badge-success',
             'VENTA': 'badge-info',
             'AJUSTE_ENTRADA': 'badge-warning',
             'AJUSTE_SALIDA': 'badge-danger',
-            'DEVOLUCION': 'badge-secondary'
+            'DEVOLUCION': 'badge-secondary',
+            'PERDIDA_DESECHO': 'badge-danger'
         };
-        return classes[tipo] || 'badge-info';
+        return map[tipo] || 'badge-info';
     }
 }

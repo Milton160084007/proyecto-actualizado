@@ -2,9 +2,9 @@
     <header class="page-header">
         <h1>Movimientos de Inventario</h1>
         <div class="header-actions">
-            <button class="btn btn-secondary" (click)="cargarDatos()">Recargar</button>
             <button class="btn btn-success" (click)="abrirModal('ENTRADA')">+ Compra</button>
             <button class="btn btn-primary" (click)="abrirModal('SALIDA')">- Venta</button>
+            <button class="btn btn-danger" (click)="abrirModal('PERDIDA')">- Pérdida / Desecho</button>
         </div>
     </header>
 
@@ -62,6 +62,7 @@
                 <h3>
                     <span *ngIf="tipoMovimiento === 'ENTRADA'" class="text-success">+ Compra (Entrada)</span>
                     <span *ngIf="tipoMovimiento === 'SALIDA'" class="text-primary">- Venta (Salida)</span>
+                    <span *ngIf="tipoMovimiento === 'PERDIDA'" class="text-danger">- Pérdida / Desecho</span>
                 </h3>
                 <button class="modal-close" (click)="cerrarModal()">&times;</button>
             </div>
@@ -124,12 +125,12 @@
                 <!-- Campos extra para entradas (lote) -->
                 <div class="form-row" *ngIf="tipoMovimiento === 'ENTRADA'">
                     <div class="form-group">
-                        <label class="form-label">Nro. de Lote</label>
+                        <label class="form-label">Nro. de Lote *</label>
                         <input type="text" class="form-control" [(ngModel)]="movimientoActual.nro_lote" name="nro_lote"
-                            placeholder="Opcional">
+                            placeholder="Obligatorio">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Fecha Vencimiento</label>
+                        <label class="form-label">Fecha Vencimiento *</label>
                         <input type="date" class="form-control" [(ngModel)]="movimientoActual.fecha_vencimiento"
                             name="fecha_vencimiento">
                     </div>
@@ -169,7 +170,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
                     <button type="submit" class="btn"
-                        [ngClass]="tipoMovimiento === 'ENTRADA' ? 'btn-success' : 'btn-primary'" [disabled]="loading">
+                        [ngClass]="tipoMovimiento === 'ENTRADA' ? 'btn-success' : (tipoMovimiento === 'PERDIDA' ? 'btn-danger' : 'btn-primary')"
+                        [disabled]="loading">
                         {{ loading ? 'Procesando...' : 'Registrar ' + tipoMovimiento }}
                     </button>
                 </div>

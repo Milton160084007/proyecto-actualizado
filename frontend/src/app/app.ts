@@ -18,11 +18,6 @@ export class App implements OnInit {
   notifOpen = false;
   darkMode = false;
 
-  // Global Search
-  searchOpen = false;
-  searchQuery = '';
-  searchResults: any = { productos: [], clientes: [], ventas: [] };
-  searchLoading = false;
 
   constructor(public auth: AuthService, private api: ApiService, private router: Router) { }
 
@@ -47,7 +42,7 @@ export class App implements OnInit {
     });
   }
 
-  toggleNotif() { this.notifOpen = !this.notifOpen; this.searchOpen = false; }
+  toggleNotif() { this.notifOpen = !this.notifOpen; }
 
   toggleMenu() { this.menuOpen = !this.menuOpen; }
 
@@ -73,23 +68,5 @@ export class App implements OnInit {
     document.documentElement.setAttribute('data-theme', this.darkMode ? 'dark' : 'light');
   }
 
-  // ======= Global Search =======
-  toggleSearch() { this.searchOpen = !this.searchOpen; this.notifOpen = false; }
 
-  buscar() {
-    if (!this.searchQuery.trim()) { this.searchResults = { productos: [], clientes: [], ventas: [] }; return; }
-    this.searchLoading = true;
-    this.api.busquedaGlobal(this.searchQuery).subscribe({
-      next: (res) => { this.searchResults = res; this.searchLoading = false; },
-      error: () => this.searchLoading = false
-    });
-  }
-
-  irA(tipo: string, id: number) {
-    this.searchOpen = false;
-    this.searchQuery = '';
-    if (tipo === 'producto') this.router.navigate(['/productos']);
-    else if (tipo === 'cliente') this.router.navigate(['/clientes']);
-    else if (tipo === 'venta') this.router.navigate(['/ventas']);
-  }
 }

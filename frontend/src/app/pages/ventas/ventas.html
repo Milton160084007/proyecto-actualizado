@@ -143,9 +143,9 @@
                                     <span>$ {{ item.precio_unitario | number:'1.2-2' }}</span>
                                 </div>
                                 <div class="campo">
-                                    <label>Desc:</label>
-                                    <input type="number" min="0" step="0.01" [(ngModel)]="item.descuento"
-                                        (change)="recalcularLinea(item)">
+                                    <label>Desc (%):</label>
+                                    <input type="number" min="0" max="100" step="1"
+                                        [(ngModel)]="item.descuento_pct_input" (ngModelChange)="recalcularLinea(item)">
                                     <small *ngIf="item.descuento_nombre" class="badge badge-success"
                                         style="font-size:0.65rem; margin-top: 2px;">
                                         🏷️ {{ item.descuento_nombre }} (-{{ item.descuento_pct }}%)

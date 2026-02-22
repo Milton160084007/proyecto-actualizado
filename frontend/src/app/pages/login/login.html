@@ -12,7 +12,7 @@
                 <div class="input-wrapper">
                     <span class="input-icon">👤</span>
                     <input type="text" class="form-control" [(ngModel)]="usuario" name="usuario"
-                        placeholder="Ingresa tu usuario" autocomplete="username" autofocus>
+                        placeholder="Ingresa tu usuario" autocomplete="username" autofocus [disabled]="loading">
                 </div>
             </div>
 
@@ -21,7 +21,7 @@
                 <div class="input-wrapper">
                     <span class="input-icon">🔒</span>
                     <input type="password" class="form-control" [(ngModel)]="contrasena" name="contrasena"
-                        placeholder="Ingresa tu contraseña" autocomplete="current-password">
+                        placeholder="Ingresa tu contraseña" autocomplete="current-password" [disabled]="loading">
                 </div>
             </div>
 

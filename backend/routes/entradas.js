@@ -81,10 +81,10 @@ router.post('/', async (req, res) => {
             // 1. Crear lote
             const [loteResult] = await connection.query(`
                 INSERT INTO lotes (prodid, lotnro_lote, lotfecha_vencimiento, 
-                                   lotcantidad_inicial, lotcantidad_actual, lotcosto_compra)
-                VALUES (?, ?, ?, ?, ?, ?)
+                                   lotcantidad_inicial, lotcantidad_actual, lotcosto_compra, provid)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             `, [item.prodid, item.nro_lote || null, item.fecha_vencimiento,
-            item.cantidad, item.cantidad, item.costo_compra]);
+            item.cantidad, item.cantidad, item.costo_compra, item.provid || null]);
 
             // 2. Registrar en kardex (el trigger actualiza prodstock_global)
             await connection.query(`

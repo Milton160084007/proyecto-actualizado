@@ -53,24 +53,7 @@
             <!-- Panel Izquierdo: Proveedor + Productos -->
             <div class="compra-panel-izq">
 
-                <!-- Seleccionar Proveedor -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>🚚 Proveedor</h3>
-                    </div>
-                    <div class="card-body">
-                        <select class="form-control" [(ngModel)]="proveedorSeleccionado">
-                            <option [ngValue]="null">-- Seleccione un proveedor --</option>
-                            <option *ngFor="let p of proveedores" [ngValue]="p">
-                                {{ p.provnombre }} ({{ p.provruc }})
-                            </option>
-                        </select>
-                        <div *ngIf="proveedorSeleccionado" class="prov-det">
-                            <small>📞 {{ proveedorSeleccionado.provtelefono || 'Sin teléfono' }}</small>
-                            <small>📍 {{ proveedorSeleccionado.provdireccion || 'Sin dirección' }}</small>
-                        </div>
-                    </div>
-                </div>
+
 
                 <!-- Buscar Producto -->
                 <div class="card">
@@ -117,6 +100,15 @@
                             </div>
                             <div class="compra-item-body">
                                 <div class="campo">
+                                    <label>Proveedor (Opcional):</label>
+                                    <select [(ngModel)]="item.provid" style="max-width: 150px;">
+                                        <option [ngValue]="null">-- General --</option>
+                                        <option *ngFor="let p of item.proveedoresDisponibles" [value]="p.provid">
+                                            {{ p.provnombre }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="campo">
                                     <label>Cantidad:</label>
                                     <input type="number" min="1" [(ngModel)]="item.cantidad">
                                 </div>
@@ -125,11 +117,11 @@
                                     <input type="number" min="0" step="0.01" [(ngModel)]="item.costo_compra">
                                 </div>
                                 <div class="campo">
-                                    <label>N° Lote:</label>
-                                    <input type="text" [(ngModel)]="item.nro_lote" placeholder="Opcional">
+                                    <label>N° Lote *:</label>
+                                    <input type="text" [(ngModel)]="item.nro_lote" placeholder="Obligatorio">
                                 </div>
                                 <div class="campo">
-                                    <label>Vencimiento:</label>
+                                    <label>Vencimiento *:</label>
                                     <input type="date" [(ngModel)]="item.fecha_vencimiento">
                                 </div>
                                 <div class="campo total">
@@ -146,7 +138,15 @@
 
                     <!-- Resumen -->
                     <div class="compra-resumen" *ngIf="items.length > 0">
-                        <div class="resumen-linea resumen-total">
+                        <div class="resumen-linea">
+                            <span>Subtotal:</span>
+                            <span>$ {{ subtotalCompra | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea">
+                            <span>IVA ({{porcentajeIva}}%):</span>
+                            <span>$ {{ ivaCompra | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea resumen-total mt-2">
                             <strong>TOTAL COMPRA:</strong>
                             <strong>$ {{ totalCompra | number:'1.2-2' }}</strong>
                         </div>

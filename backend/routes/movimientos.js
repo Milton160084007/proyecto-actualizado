@@ -61,7 +61,7 @@ router.post('/ajuste', async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        const { prodid, cantidad_real, observacion } = req.body;
+        const { prodid, cantidad_real, observacion, tipo_especifico } = req.body;
         const usuid = req.body.usuid || 1;
 
         // Obtener producto actual
@@ -83,7 +83,8 @@ router.post('/ajuste', async (req, res) => {
             return res.json({ mensaje: 'No hay diferencia, stock ya coincide' });
         }
 
-        const tipo = diferencia > 0 ? 'AJUSTE_ENTRADA' : 'AJUSTE_SALIDA';
+        const tipoBase = diferencia > 0 ? 'AJUSTE_ENTRADA' : 'AJUSTE_SALIDA';
+        const tipo = tipo_especifico || tipoBase;
         const cantidadAbs = Math.abs(diferencia);
 
         // Registrar en kardex (el trigger actualiza prodstock_global)
