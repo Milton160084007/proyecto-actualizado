@@ -27,6 +27,27 @@ CREATE TABLE usuarios (
     FOREIGN KEY (rolid) REFERENCES roles(rolid)
 );
 
+CREATE TABLE configuracion (
+    confid INT AUTO_INCREMENT PRIMARY KEY,
+    confnombre_empresa VARCHAR(150) DEFAULT 'Micromercado Muñoz',
+    confruc VARCHAR(20) DEFAULT '0000000000001',
+    confdireccion TEXT,
+    conftelefono VARCHAR(20),
+    confiva_porcentaje DECIMAL(5,2) DEFAULT 15.00,
+    confmoneda VARCHAR(10) DEFAULT 'USD'
+);
+
+CREATE TABLE auditoria (
+    audid INT AUTO_INCREMENT PRIMARY KEY,
+    usuid INT,
+    audaccion VARCHAR(50) NOT NULL,
+    audtabla VARCHAR(50) NOT NULL,
+    audregistro_id INT,
+    auddetalle TEXT,
+    audfecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuid) REFERENCES usuarios(usuid)
+);
+
 -- --------------------------------------------------------
 -- 2. CATÁLOGOS DE PRODUCTOS Y PROVEEDORES
 -- --------------------------------------------------------

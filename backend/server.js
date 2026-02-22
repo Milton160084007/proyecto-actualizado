@@ -103,7 +103,7 @@ app.get('/api/dashboard', async (req, res) => {
         // Lotes próximos a vencer (lista)
         const [porVencerLista] = await pool.query(`
             SELECT p.prodnombre as nombre, l.lotfecha_vencimiento as fecha_vencimiento,
-                   l.lotcantidad_actual as cantidad
+                   l.lotcantidad_actual as cantidad, l.lotnro_lote as lotnumero
             FROM lotes l
             JOIN productos p ON l.prodid = p.prodid
             WHERE l.lotfecha_vencimiento IS NOT NULL 
